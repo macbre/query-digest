@@ -19,8 +19,9 @@ def get_sql_queries(path, limit=100000):
     # source = Kibana(period=3600)  # last hour
 
     matches = source.query_by_string(
-        query='appname: "mediawiki" AND @message: "^SQL" AND @exception.trace: "{}"'.format(path),
-        limit=500000
+        query='appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" '
+              'AND @message: "^SQL" AND @exception.trace: "{}"'.format(path),
+        limit=100000
     )
 
     return tuple(matches)
