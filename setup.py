@@ -10,6 +10,7 @@ setup(
     author='macbre',
     author_email='macbre@wikia-inc.com',
     install_requires=[
+        'docopt==0.6.2',
         'tabulate==0.7.7',
         'wikia.common.kibana==1.2.1',
     ],
