@@ -10,9 +10,10 @@ def map_reduce(sequence, map_func, reduce_func):
 
     :type sequence tuple
     :type map_func (dict) -> str
-    :type reduce_func (str, tuple) -> dict
+    :type reduce_func (str, tuple, int) -> dict
     :return: tuple
     """
+    sequence_len = len(sequence)
     groups = defaultdict(list)
 
     for item in sequence:
@@ -20,6 +21,6 @@ def map_reduce(sequence, map_func, reduce_func):
 
     res = list()
     for key, values in groups.items():
-        res.append((key, reduce_func(key, values)))
+        res.append((key, reduce_func(key, values, sequence_len)))
 
     return tuple(res)

@@ -9,15 +9,17 @@ from digest.math import median
 from digest.queries import get_sql_queries, normalize_query_log_entry, filter_query
 
 
-def queries_reduce(_, values):
+def queries_reduce(_, values, sequence_len):
     """
     :type _ str
     :type values tuple[dict]
+    :type sequence_len int
     :rtype dict
     """
     ret = values[0].copy()
 
     ret['count'] = len(values)
+    ret['percentage'] = '{:.2f}%'.format(100. * ret['count'] / sequence_len)
 
     # calculate times stats
     times = [value.get('time') for value in values]
@@ -60,5 +62,6 @@ def main(path='/extensions/wikia/Wall'):
     data = [entry for (_, entry) in results_ordered]
 
     # @see https://pypi.python.org/pypi/tabulate
+    print('Query digest for "{}" path, found {} queries'.format(path, len(queries)))
     print(tabulate(data, headers='keys', tablefmt='grid'))
     print('Note: times are in [ms], queries are normalized')
