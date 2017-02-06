@@ -7,9 +7,9 @@ from wikia.common.kibana import Kibana
 from .helpers import generalize_sql
 
 
-def get_sql_queries(path, limit=3000000):  # 3 mm
+def get_sql_queries(path, limit=500000):
     """
-    Get MediaWiki SQL queries made in the last 24h from a given code path
+    Get MediaWiki SQL queries made in the last hour from a given code path
 
     Please note that SQL queries log is sampled at 1%
 
@@ -18,8 +18,8 @@ def get_sql_queries(path, limit=3000000):  # 3 mm
     :rtype tuple
     """
     logger = logging.getLogger('get_sql_queries')
-    source = Kibana(period=Kibana.DAY)
-    # source = Kibana(period=3600)  # last hour
+    # source = Kibana(period=6*60*60)  # 6 hours
+    source = Kibana(period=3600)  # last hour
 
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
             'AND @message: "^SQL" AND @exception.trace: "{}"'.format(path)
