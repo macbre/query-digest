@@ -7,7 +7,7 @@ from wikia.common.kibana import Kibana
 from .helpers import generalize_sql
 
 
-def get_sql_queries(path, limit=2000000):
+def get_sql_queries(path, limit=3000000):  # 3 mm
     """
     Get MediaWiki SQL queries made in the last 24h from a given code path
 
@@ -64,4 +64,5 @@ def filter_query(entry):
     """
     query = entry['query']
 
-    return 'BEGIN' not in query and 'COMMIT' not in query and 'SHOW SLAVE STATUS' not in query
+    return 'BEGIN' not in query and 'COMMIT' not in query and 'SHOW SLAVE STATUS' not in query \
+        and not query.startswith('Important table write')
