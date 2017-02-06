@@ -11,7 +11,7 @@ setup(
     author_email='macbre@wikia-inc.com',
     install_requires=[
         'tabulate==0.7.7',
-        'wikia.common.kibana==1.1.1',
+        'wikia.common.kibana==1.2.1',
     ],
     include_package_data=True,
     entry_points={
