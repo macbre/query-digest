@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from digest.map_reduce import map_reduce
 from digest.math import median
-from digest.utils import get_sql_queries, normalize_query_log_entry
+from digest.queries import get_sql_queries, normalize_query_log_entry, filter_query
 
 
 def queries_reduce(_, values):
@@ -43,6 +43,7 @@ def main(path='/extensions/wikia/Wall'):
     logger.info('Digesting queries for "{}" path'.format(path))
 
     queries = tuple(map(normalize_query_log_entry, get_sql_queries(path)))
+    queries = tuple(filter(filter_query, queries))
 
     logger.info('Processing {} queries...'.format(len(queries)))
 

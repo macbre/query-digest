@@ -1,3 +1,5 @@
+import logging
+
 from collections import OrderedDict
 
 from wikia.common.kibana import Kibana
@@ -5,7 +7,7 @@ from wikia.common.kibana import Kibana
 from .helpers import generalize_sql
 
 
-def get_sql_queries(path, limit=100000):
+def get_sql_queries(path, limit=2000000):
     """
     Get MediaWiki SQL queries made in the last 24h from a given code path
 
@@ -15,14 +17,16 @@ def get_sql_queries(path, limit=100000):
     :type limit int
     :rtype tuple
     """
+    logger = logging.getLogger('get_sql_queries')
     source = Kibana(period=Kibana.DAY)
     # source = Kibana(period=3600)  # last hour
 
-    matches = source.query_by_string(
-        query='appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" '
-              'AND @message: "^SQL" AND @exception.trace: "{}"'.format(path),
-        limit=100000
-    )
+    query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
+            'AND @message: "^SQL" AND @exception.trace: "{}"'.format(path)
+
+    logger.info('Query: "{}"'.format(query))
+
+    matches = source.query_by_string(query, limit)
 
     return tuple(matches)
 
@@ -49,3 +53,15 @@ def normalize_query_log_entry(entry):
     res['time'] = float(1000. * context.get('elapsed', 0))  # [ms]
 
     return res
+
+
+def filter_query(entry):
+    """
+    Filter out transactions
+
+    :type entry dict
+    :rtype bool
+    """
+    query = entry['query']
+
+    return 'BEGIN' not in query and 'COMMIT' not in query and 'SHOW SLAVE STATUS' not in query
