@@ -3,13 +3,16 @@ This is a **dynamic code analysis tool** that processes last hour of **SQL queri
 those made by given feature or using given table
 
 Usage:
-  query_digest [ --path=<path> ] [ --table=<table> ] [ --csv ]
+  query_digest [ --path=<path> ] [ --table=<table> ] [ --csv ] [ --simple ]
 
 Example:
   query_digest --path=extensions/wikia/Wall
   query_digest --path=extensions/wikia/Wall --csv
+
   query_digest --table=wall_notification
   query_digest --table=wall_notification --csv
+
+  query_digest --table=wall_notification --simple - simple output type (list queries only)
 """
 from __future__ import print_function
 
@@ -66,6 +69,7 @@ def main():
     path = arguments.get('--path')
     table = arguments.get('--table')
     output_csv = arguments.get('--csv') is True
+    simple_output = arguments.get('--simple') is True
 
     if path is not None:
         logger.info('Digesting queries for "{}" path'.format(path))
@@ -102,12 +106,20 @@ def main():
 
     report_header = 'Query digest for "{}" path / "{}" table, found {} queries'.format(path, table, len(queries))
 
+    # --csv
     if output_csv:
         writer = DictWriter(f=stdout, fieldnames=data[0].keys())
 
         stdout.write('# {}\n'.format(report_header))
         writer.writeheader()
         writer.writerows(data)
+    # --simple
+    elif simple_output:
+        print(report_header)
+        stdout.writelines([
+            '{method} [{source_host}] | {query}\n'.format(**entry)
+            for entry in data
+        ])
     else:
         # @see https://pypi.python.org/pypi/tabulate
         print(report_header)
