@@ -7,7 +7,24 @@ from wikia.common.kibana import Kibana
 from .helpers import generalize_sql
 
 
-def get_sql_queries(path, limit=500000):
+def get_log_entries(query, period, limit):
+    """
+    Get log entries from elasticsearch that match given query
+
+    :type query str
+    :type period int
+    :type limit int
+    :rtype tuple
+    """
+    logger = logging.getLogger('get_log_entries')
+    source = Kibana(period=period)
+
+    logger.info('Query: \'{}\' for the last {} hour(s)'.format(query, period / 3600))
+
+    return tuple(source.query_by_string(query, limit))
+
+
+def get_sql_queries_by_path(path, limit=500000):
     """
     Get MediaWiki SQL queries made in the last hour from a given code path
 
@@ -17,18 +34,34 @@ def get_sql_queries(path, limit=500000):
     :type limit int
     :rtype tuple
     """
-    logger = logging.getLogger('get_sql_queries')
-    # source = Kibana(period=6*60*60)  # 6 hours
-    source = Kibana(period=3600)  # last hour
-
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
             'AND @message: "^SQL" AND @exception.trace: "{}"'.format(path)
 
-    logger.info('Query: "{}"'.format(query))
+    return get_log_entries(
+        query=query,
+        period=3600,  # last hour
+        limit=limit
+    )
 
-    matches = source.query_by_string(query, limit)
 
-    return tuple(matches)
+def get_sql_queries_by_table(table, limit=500000):
+    """
+    Get MediaWiki SQL queries made in the 24 hours affecting given table
+
+    Please note that SQL queries log is sampled at 1%
+
+    :type table str
+    :type limit int
+    :rtype tuple
+    """
+    query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
+            'AND @message: "^SQL" AND @message: "{}"'.format(table)
+
+    return get_log_entries(
+        query=query,
+        period=3600,  # last hour
+        limit=limit
+    )
 
 
 def normalize_query_log_entry(entry):
