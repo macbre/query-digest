@@ -1,6 +1,7 @@
 import logging
 
 from collections import OrderedDict
+from hashlib import md5
 
 from wikia.common.kibana import Kibana
 
@@ -37,11 +38,13 @@ def get_sql_queries_by_path(path, limit=500000):
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
             'AND @message: "^SQL" AND NOT @message: "action=delete" AND @exception.trace: "{}"'.format(path)
 
-    return get_log_entries(
+    entries = get_log_entries(
         query=query,
         period=3600,  # last hour
         limit=limit
     )
+
+    return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
 
 def get_sql_queries_by_table(table, limit=500000):
@@ -57,16 +60,39 @@ def get_sql_queries_by_table(table, limit=500000):
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
             'AND @message: "^SQL" AND NOT @message: "action=delete" AND @message: "{}" '.format(table)
 
-    return get_log_entries(
+    entries = get_log_entries(
         query=query,
         period=3600,  # last hour
         limit=limit
     )
 
+    return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
-def normalize_query_log_entry(entry):
+
+def get_sql_queries_by_service(service, limit=500000):
     """
-    Normalizes given query log entry and keeps only needed fields
+    Get Pandora SQL queries made by a given service
+
+    Please note that SQL queries log is sampled at 1%
+
+    :type service str
+    :type limit int
+    :rtype tuple
+    """
+    query = 'appname:"{}" AND logger_name:"query-log-sampler" AND env: "prod"'.format(service)
+
+    entries = get_log_entries(
+        query=query,
+        period=3600,  # last hour
+        limit=limit
+    )
+
+    return tuple(map(normalize_pandora_query_log_entry, entries))
+
+
+def normalize_mediawiki_query_log_entry(entry):
+    """
+    Normalizes given MediaWiki query log entry and keeps only needed fields
 
     :type entry dict
     :return: dict
@@ -85,6 +111,30 @@ def normalize_query_log_entry(entry):
 
     res['rows'] = int(context.get('num_rows', 0))
     res['time'] = float(1000. * context.get('elapsed', 0))  # [ms]
+
+    return res
+
+
+def normalize_pandora_query_log_entry(entry):
+    """
+    Normalizes given Pandora query log entry and keeps only needed fields
+
+    :type entry dict
+    :return: dict
+    """
+    res = OrderedDict()
+
+    res['query'] = generalize_sql(entry.get('rawMessage'))
+    res['method'] = entry.get('thread_name')  # TODO: implement in Pandora
+    res['dbname'] = entry.get('appname')  # TODO: implement in Pandora
+
+    res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. mesos
+
+    res['rows'] = int(entry.get('numRows', 0))
+    res['time'] = float(entry.get('execTimeMs', 0))  # [ms]
+
+    # use a short md5 hash of normalized SQL method to generate the method name
+    res['method'] = md5(res['query']).hexdigest()[0:8]
 
     return res
 

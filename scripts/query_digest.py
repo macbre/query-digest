@@ -3,7 +3,7 @@ This is a **dynamic code analysis tool** that processes last hour of **SQL queri
 those made by given feature or using given table
 
 Usage:
-  query_digest [ --path=<path> ] [ --table=<table> ] [ --csv ] [ --simple ]
+  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --csv ] [ --simple ]
 
 Example:
   query_digest --path=extensions/wikia/Wall
@@ -11,6 +11,9 @@ Example:
 
   query_digest --table=wall_notification
   query_digest --table=wall_notification --csv
+
+  query_digest --service=content-entity-worker
+  query_digest --service=content-entity-worker --csv
 
   query_digest --table=wall_notification --simple - simple output type (list queries only)
 """
@@ -25,7 +28,7 @@ from tabulate import tabulate
 
 from digest.map_reduce import map_reduce
 from digest.math import median
-from digest.queries import get_sql_queries_by_path, get_sql_queries_by_table, normalize_query_log_entry, filter_query
+from digest.queries import get_sql_queries_by_path, get_sql_queries_by_table, get_sql_queries_by_service, filter_query
 
 
 def queries_reduce(_, values, sequence_len):
@@ -81,12 +84,16 @@ def main():
     logger.info("Got the following arguments: {}".format(arguments))
 
     path = arguments.get('--path')
+    service = arguments.get('--service')
     table = arguments.get('--table')
+
     output_csv = arguments.get('--csv') is True
     simple_output = arguments.get('--simple') is True
 
     if path is not None:
         logger.info('Digesting queries for "{}" path'.format(path))
+    elif service is not None:
+        logger.info('Digesting queries made by "{}" Pandora service'.format(service))
     elif table is not None:
         logger.info('Digesting queries affecting "{}" table'.format(table))
     else:
@@ -95,10 +102,11 @@ def main():
     # run the reporter
     if path is not None:
         queries = get_sql_queries_by_path(path)
+    elif service is not None:
+        queries = get_sql_queries_by_service(service)
     else:
         queries = get_sql_queries_by_table(table)
 
-    queries = tuple(map(normalize_query_log_entry, queries))
     queries = tuple(filter(filter_query, queries))
 
     if len(queries) == 0:
@@ -118,7 +126,8 @@ def main():
     results_ordered = sorted(results, key=lambda (_, item): item['time_sum'], reverse=True)
     data = [entry for (_, entry) in results_ordered]
 
-    report_header = 'Query digest for "{}" path / "{}" table, found {} queries'.format(path, table, len(queries))
+    report_header = 'Query digest for "{}" path / "{}" table / "{}" service, found {} queries'.\
+        format(path, table, service, len(queries))
 
     # --csv
     if output_csv:
