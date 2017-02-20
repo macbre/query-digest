@@ -67,6 +67,9 @@ def queries_reduce(_, values, sequence_len):
     else:
         ret['from_master'] = None
 
+    # FIXME: from_master will show cases when DB_MASTER is selected because of load-balancer weights
+    del ret['from_master']
+
     return ret
 
 
@@ -128,7 +131,7 @@ def main():
     elif simple_output:
         print(report_header)
         stdout.writelines([
-            '{method} {percentage} [{source_host}] from master: {from_master} | {query}\n'.format(**entry)
+            '{method} {percentage} [{source_host}] | {query}\n'.format(**entry)
             for entry in data
         ])
     else:
