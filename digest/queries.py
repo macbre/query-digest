@@ -35,7 +35,7 @@ def get_sql_queries_by_path(path, limit=500000):
     :rtype tuple
     """
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "^SQL" AND @exception.trace: "{}"'.format(path)
+            'AND @message: "^SQL" AND NOT @message: "action=delete" AND @exception.trace: "{}"'.format(path)
 
     return get_log_entries(
         query=query,
@@ -55,7 +55,7 @@ def get_sql_queries_by_table(table, limit=500000):
     :rtype tuple
     """
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "^SQL" AND @message: "{}"'.format(table)
+            'AND @message: "^SQL" AND NOT @message: "action=delete" AND @message: "{}" '.format(table)
 
     return get_log_entries(
         query=query,
@@ -79,6 +79,7 @@ def normalize_query_log_entry(entry):
     res['query'] = generalize_sql(entry.get('@message').replace('SQL ', ''))
     res['method'] = context.get('method')
     res['dbname'] = 'local' if fields.get('wiki_dbname') == context.get('db_name') else context.get('db_name')
+    res['from_master'] = context.get('server_role', 'slave') == 'master'
 
     res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. ap / cron / task
 

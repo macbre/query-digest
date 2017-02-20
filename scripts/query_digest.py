@@ -56,6 +56,17 @@ def queries_reduce(_, values, sequence_len):
     del ret['rows']
     del ret['time']
 
+    # count all queries that were made using master node
+    if ret.get('from_master') is not None:
+        master_queries = reduce(
+            lambda acc, i: acc+1 if i.get('from_master') is True else acc,
+            values,
+            0  # initializer
+        )
+        ret['from_master'] = master_queries > 0
+    else:
+        ret['from_master'] = None
+
     return ret
 
 
@@ -117,7 +128,7 @@ def main():
     elif simple_output:
         print(report_header)
         stdout.writelines([
-            '{method} [{source_host}] | {query}\n'.format(**entry)
+            '{method} {percentage} [{source_host}] from master: {from_master} | {query}\n'.format(**entry)
             for entry in data
         ])
     else:
