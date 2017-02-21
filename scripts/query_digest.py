@@ -102,10 +102,13 @@ def main():
     # run the reporter
     if path is not None:
         queries = get_sql_queries_by_path(path)
+        report_header = '"{}" path'.format(path)
     elif service is not None:
         queries = get_sql_queries_by_service(service)
+        report_header = '"{}" service'.format(service)
     else:
         queries = get_sql_queries_by_table(table)
+        report_header = '"{}" table'.format(table)
 
     queries = tuple(filter(filter_query, queries))
 
@@ -126,8 +129,7 @@ def main():
     results_ordered = sorted(results, key=lambda (_, item): item['time_sum'], reverse=True)
     data = [entry for (_, entry) in results_ordered]
 
-    report_header = 'Query digest for "{}" path / "{}" table / "{}" service, found {} queries'.\
-        format(path, table, service, len(queries))
+    report_header = 'Query digest for {}, found {} queries'.format(report_header, len(queries))
 
     # --csv
     if output_csv:
