@@ -13,6 +13,8 @@ def generalize_sql(sql):
     if sql is None:
         return None
 
+    sql = sql.encode('utf8')
+
     # MW comments
     # e.g. /* CategoryDataService::getMostVisited N.N.N.N */
     sql = re.sub(r'\s?/\*.+\*/', '', sql)
