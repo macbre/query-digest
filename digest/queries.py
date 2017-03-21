@@ -69,6 +69,24 @@ def get_sql_queries_by_table(table, limit=500000):
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
 
+def get_backend_queries_by_table(table, limit=500000, period=3600):
+    """
+    Get Perl backend SQL queries made in the last hour affecting given table
+
+    Please note that SQL queries log is sampled at 1%
+
+    :type table str
+    :type limit int
+    :type period int
+    :rtype tuple
+    """
+    query = 'program:"backend" AND @context.statement: * AND @message: "{}"'.format(table)
+
+    entries = get_log_entries(query, period, limit)
+
+    return tuple(map(normalize_backend_query_log_entry, entries))
+
+
 def get_sql_queries_by_service(service, limit=500000):
     """
     Get Pandora SQL queries made by a given service
@@ -108,6 +126,30 @@ def normalize_mediawiki_query_log_entry(entry):
     res['from_master'] = context.get('server_role', 'slave') == 'master'
 
     res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. ap / cron / task
+
+    res['rows'] = int(context.get('num_rows', 0))
+    res['time'] = float(1000. * context.get('elapsed', 0))  # [ms]
+
+    return res
+
+
+def normalize_backend_query_log_entry(entry):
+    """
+    Normalizes given backend query log entry and keeps only needed fields
+
+    :type entry dict
+    :return: dict
+    """
+    context = entry.get('@context', {})
+
+    res = OrderedDict()
+
+    res['query'] = generalize_sql(entry.get('@message').replace('SQL ', ''))
+    res['method'] = context.get('method')  # e.g. "DB.pm line 171 via phalanx_stats.pl line 158"
+    res['dbname'] = context.get('db_name')  # e.g. "specials"
+    res['from_master'] = context.get('server_role', 'slave') == 'master'
+
+    res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. job / task
 
     res['rows'] = int(context.get('num_rows', 0))
     res['time'] = float(1000. * context.get('elapsed', 0))  # [ms]

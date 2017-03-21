@@ -28,7 +28,9 @@ from tabulate import tabulate
 
 from digest.map_reduce import map_reduce
 from digest.math import median
-from digest.queries import get_sql_queries_by_path, get_sql_queries_by_table, get_sql_queries_by_service, filter_query
+from digest.queries import \
+    get_sql_queries_by_path, get_sql_queries_by_table, get_backend_queries_by_table, get_sql_queries_by_service, \
+    filter_query
 
 
 def queries_reduce(_, values, sequence_len):
@@ -107,7 +109,7 @@ def main():
         queries = get_sql_queries_by_service(service)
         report_header = '"{}" service'.format(service)
     else:
-        queries = get_sql_queries_by_table(table)
+        queries = get_sql_queries_by_table(table) + get_backend_queries_by_table(table)
         report_header = '"{}" table'.format(table)
 
     queries = tuple(filter(filter_query, queries))
