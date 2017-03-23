@@ -25,7 +25,7 @@ def get_log_entries(query, period, limit):
     return tuple(source.query_by_string(query, limit))
 
 
-def get_sql_queries_by_path(path, limit=500000):
+def get_sql_queries_by_path(path, limit=500000, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour from a given code path
 
@@ -33,38 +33,32 @@ def get_sql_queries_by_path(path, limit=500000):
 
     :type path str
     :type limit int
+    :type period int
     :rtype tuple
     """
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
             'AND @message: "^SQL" AND NOT @message: "action=delete" AND @exception.trace: "{}"'.format(path)
 
-    entries = get_log_entries(
-        query=query,
-        period=3600,  # last hour
-        limit=limit
-    )
+    entries = get_log_entries(query, period, limit)
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
 
-def get_sql_queries_by_table(table, limit=500000):
+def get_sql_queries_by_table(table, limit=500000, period=3600):
     """
-    Get MediaWiki SQL queries made in the 24 hours affecting given table
+    Get MediaWiki SQL queries made in the last hour affecting given table
 
     Please note that SQL queries log is sampled at 1%
 
     :type table str
     :type limit int
+    :type period int
     :rtype tuple
     """
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
             'AND @message: "^SQL" AND NOT @message: "action=delete" AND @message: "{}" '.format(table)
 
-    entries = get_log_entries(
-        query=query,
-        period=3600,  # last hour
-        limit=limit
-    )
+    entries = get_log_entries(query, period, limit)
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 

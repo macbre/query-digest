@@ -3,11 +3,12 @@ This is a **dynamic code analysis tool** that processes last hour of **SQL queri
 those made by given feature or using given table
 
 Usage:
-  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --csv ] [ --simple ]
+  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --csv ] [ --simple ] [ --last-24h ]
 
 Example:
   query_digest --path=extensions/wikia/Wall
   query_digest --path=extensions/wikia/Wall --csv
+  query_digest --path=extensions/wikia/Wall --last-24h
 
   query_digest --table=wall_notification
   query_digest --table=wall_notification --csv
@@ -92,6 +93,8 @@ def main():
     output_csv = arguments.get('--csv') is True
     simple_output = arguments.get('--simple') is True
 
+    period = 86400 if arguments.get('--last-24h') is True else 3600
+
     if path is not None:
         logger.info('Digesting queries for "{}" path'.format(path))
     elif service is not None:
@@ -103,13 +106,13 @@ def main():
 
     # run the reporter
     if path is not None:
-        queries = get_sql_queries_by_path(path)
+        queries = get_sql_queries_by_path(path, period=period)
         report_header = '"{}" path'.format(path)
     elif service is not None:
-        queries = get_sql_queries_by_service(service)
+        queries = get_sql_queries_by_service(service, period=period)
         report_header = '"{}" service'.format(service)
     else:
-        queries = get_sql_queries_by_table(table) + get_backend_queries_by_table(table)
+        queries = get_sql_queries_by_table(table, period=period) + get_backend_queries_by_table(table, period=period)
         report_header = '"{}" table'.format(table)
 
     queries = tuple(filter(filter_query, queries))
@@ -117,7 +120,7 @@ def main():
     if len(queries) == 0:
         raise Exception('No queries found for "{}" path'.format(path))
 
-    logger.info('Processing {} queries...'.format(len(queries)))
+    logger.info('Processing {} queries from the last {} hour(s)...'.format(len(queries), period / 3600))
 
     results = map_reduce(
         queries,
