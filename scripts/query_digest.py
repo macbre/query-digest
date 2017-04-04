@@ -147,7 +147,7 @@ def main():
     elif simple_output:
         print(report_header)
         stdout.writelines([
-            '{method} {percentage} [{source_host}] | {query}\n'.format(**entry)
+            '{method} {percentage} [{source_host}] db:{dbname} | {query}\n'.format(**entry)
             for entry in data
         ])
     else:
