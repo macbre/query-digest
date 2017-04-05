@@ -1,4 +1,5 @@
 import logging
+import re
 
 from collections import OrderedDict
 from hashlib import md5
@@ -115,7 +116,10 @@ def normalize_mediawiki_query_log_entry(entry):
     res = OrderedDict()
 
     res['query'] = generalize_sql(entry.get('@message').replace('SQL ', ''))
-    res['method'] = context.get('method')
+
+    # e.g. WikiFactory::loadVariableFromDB (from DesignSystemGlobalNavigationModel:isWikiaOrgCommunity)
+    res['method'] = re.sub(r'\s\(([^\)]+)\)', '', context.get('method'))
+
     res['dbname'] = 'local' if fields.get('wiki_dbname') == context.get('db_name') else context.get('db_name')
     res['from_master'] = context.get('server_role', 'slave') == 'master'
 
