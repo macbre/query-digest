@@ -19,7 +19,7 @@ def get_log_entries(query, period, limit):
     :rtype tuple
     """
     logger = logging.getLogger('get_log_entries')
-    source = Kibana(period=period)
+    source = Kibana(period=period, es_host='query-prod.es.service.sjc.consul')
 
     logger.info('Query: \'{}\' for the last {} hour(s)'.format(query, period / 3600))
 
