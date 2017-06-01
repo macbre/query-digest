@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'tabulate==0.7.7',
-        'wikia.common.kibana==1.2.1',
+        'wikia.common.kibana==2.1.2',
     ],
     include_package_data=True,
     entry_points={

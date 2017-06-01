@@ -9,17 +9,18 @@ from wikia.common.kibana import Kibana
 from .helpers import generalize_sql
 
 
-def get_log_entries(query, period, limit):
+def get_log_entries(query, period, limit, index_prefix='logstash-other'):
     """
     Get log entries from elasticsearch that match given query
 
     :type query str
     :type period int
     :type limit int
+    :type index_prefix str
     :rtype tuple
     """
     logger = logging.getLogger('get_log_entries')
-    source = Kibana(period=period, es_host='query-prod.es.service.sjc.consul')
+    source = Kibana(period=period, index_prefix=index_prefix)
 
     logger.info('Query: \'{}\' for the last {} hour(s)'.format(query, period / 3600))
 
@@ -38,9 +39,9 @@ def get_sql_queries_by_path(path, limit=500000, period=3600):
     :rtype tuple
     """
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "^SQL" AND NOT @message: "action=delete" AND @exception.trace: "{}"'.format(path)
+            'AND @message: "SQL" AND NOT @message: "action=delete" AND @exception.trace: "{}"'.format(path)
 
-    entries = get_log_entries(query, period, limit)
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki')
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
@@ -57,9 +58,9 @@ def get_sql_queries_by_table(table, limit=500000, period=3600):
     :rtype tuple
     """
     query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "^SQL" AND NOT @message: "action=delete" AND @message: "{}" '.format(table)
+            'AND @message: "SQL" AND NOT @message: "action=delete" AND @message: "{}"'.format(table)
 
-    entries = get_log_entries(query, period, limit)
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki')
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
@@ -77,7 +78,7 @@ def get_backend_queries_by_table(table, limit=500000, period=3600):
     """
     query = 'program:"backend" AND @context.statement: * AND @message: "{}"'.format(table)
 
-    entries = get_log_entries(query, period, limit)
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend')
 
     return tuple(map(normalize_backend_query_log_entry, entries))
 
