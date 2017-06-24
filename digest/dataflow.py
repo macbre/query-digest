@@ -14,7 +14,8 @@ def get_query_metadata(query):
     """
     kind = query.split(' ')[0].upper()  # SELECT, INSERT, UPDATE, ...
 
-    if kind in ['BEGIN', 'COMMIT', 'SHOW']:
+    # SET sql_big_selects=N
+    if kind in ['BEGIN', 'COMMIT', 'SHOW', 'SET']:
         return kind, None
 
     try:
@@ -58,7 +59,14 @@ def data_flow_format_entry(entry, max_queries):
     # ('rows_median', 8.0)]) 379
     # print(entry, max_queries)
 
-    (kind, tables) = get_query_metadata(entry.get('query'))
+    # get query metadata (kind and tables involved
+    query = entry.get('query')
+
+    try:
+        (kind, tables) = get_query_metadata(query)
+    except ValueError:
+        logger.error('Unable to parse query metadata: ' + query, exc_info=True)
+        return ''
 
     # do not include BEGIN, COMMIT and STATUS queries
     if tables is None:
@@ -78,8 +86,8 @@ def data_flow_format_entry(entry, max_queries):
             target = 'backend:{}'.format(matches.group(1))  # backend:fiximagereview.pl
             edge = '{}:{} ({})'.format(matches.group(1), matches.group(2), kind)  # fiximagereview.pl:123 (SELECT)
         else:
-            # PHP method names (Foo::get_bar)
-            (target, edge) = method.rsplit('::', 1)
+            # PHP method names (Foo::get_bar / FavoriteWikisModel:getTopWikisFromDb)
+            (target, edge) = method.rsplit('::' if '::' in method else ':', 1)
     except ValueError:
         logger.error('Unable to parse method name: ' + method, exc_info=True)
         return ''
