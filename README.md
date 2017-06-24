@@ -14,6 +14,13 @@ It then reports the following:
 * sum of query times
 * median of rows returned
 
+## Output modes
+
+* a default one will output a table with all the data above
+* `--simple` will emit a simplified view
+* `--csv` will emit CSV-formatted statistics for further processing
+* `--data-flow` will emit TSV [suitable for visualization](https://github.com/macbre/data-flow-graph)
+
 ## Install
 
 ```bash
@@ -31,6 +38,8 @@ query-digest --path="/extensions/wikia/Wall" --csv
 
 query_digest --table=wall_notification
 query_digest --table=wall_notification --csv
+
+query_digest --table=image_review --data-flow
 
 query_digest --service=content-entity-worker
 query_digest --service=content-entity-worker --csv
