@@ -19,7 +19,7 @@ It then reports the following:
 * a default one will output a table with all the data above
 * `--simple` will emit a simplified view
 * `--csv` will emit CSV-formatted statistics for further processing
-* `--data-flow` will emit TSV [suitable for visualization](https://github.com/macbre/data-flow-graph)
+* `--data-flow` will emit TSV [suitable for visualization](https://github.com/macbre/data-flow-graph) ([**an example**](https://macbre.github.io/data-flow-graph/gist.html#29e4e18743b863540ada31d66af80eff))
 
 ## Install
 
