@@ -5,8 +5,8 @@ from digest import __version__
 setup(
     name='query-digest',
     version=__version__,
-    description='Reports queries issued by a given MediaWiki feature',
-    url='https://github.com/Wikia/sus-dynks/query-digest',
+    description='Reports queries issued by a given MediaWiki feature / Pandora service / Backend script',
+    url='https://github.com/macbre/query-digest',
     author='Maciej Brencz',
     author_email='maciej.brencz@gmail.com',
     install_requires=[
