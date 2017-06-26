@@ -7,13 +7,11 @@ def generalize_sql(sql):
 
     Based on Mediawiki's DatabaseBase::generalizeSQL
 
-    :type sql str
+    :type sql str|None
     :rtype str
     """
     if sql is None:
         return None
-
-    sql = sql.encode('utf8')
 
     # MW comments
     # e.g. /* CategoryDataService::getMostVisited N.N.N.N */

@@ -1,0 +1,9 @@
+language: python
+sudo: false
+dist: trusty
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+install: make install
+script: make test
