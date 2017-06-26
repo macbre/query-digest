@@ -15,6 +15,7 @@ setup(
         # 'wikia.common.kibana==2.1.2',
         "elasticsearch>=5.0.0,<6.0.0",
         "python-dateutil==2.2",
+        'pytest==3.1.2',
     ],
     include_package_data=True,
     entry_points={

@@ -7,7 +7,7 @@ def generalize_sql(sql):
 
     Based on Mediawiki's DatabaseBase::generalizeSQL
 
-    :type sql str
+    :type sql str|None
     :rtype str
     """
     if sql is None:
