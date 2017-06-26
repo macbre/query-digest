@@ -23,7 +23,7 @@ def get_log_entries(query, period, limit, index_prefix='logstash-other'):
 
     logger.info('Query: \'{}\' for the last {} hour(s)'.format(query, period / 3600))
 
-    return tuple(source.query_by_string(query, limit))
+    return source.query_by_string(query, limit)
 
 
 def get_sql_queries_by_path(path, limit=500000, period=3600):

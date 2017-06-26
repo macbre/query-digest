@@ -25,6 +25,9 @@ class Kibana(object):
     # seconds in 24h used to get the es index for yesterday
     DAY = 86400
 
+    # batch size used when calling Scroll API
+    SCROLL_BATCH_SIZE = 5000
+
     ELASTICSEARCH_HOST = 'logs-prod.es.service.sjc.consul'  # ES5
 
     """ Interface for querying Kibana's storage """
@@ -137,28 +140,17 @@ class Kibana(object):
             index=self._index,
             query=body,
             sort=["_doc"],  # return the next batch of results from every shard that still has results to return.
-            size=1000,  # batch size
+            size=self.SCROLL_BATCH_SIZE,
         )
 
         # get only requested amount of entries and cast them to a list
-        rows = islice(rows, 0, limit)
-        rows = [entry['_source'] for entry in rows]  # get data
+        rows_cnt = 0
 
-        self._logger.info("{:d} rows returned".format(len(rows)))
-        return rows
+        for entry in islice(rows, 0, limit):
+            rows_cnt += 1
+            yield entry['_source']
 
-    def get_rows(self, match, limit=10):
-        """
-        Returns raw rows that matches given query
-
-        :arg match: query to be run against Kibana log messages (ex. {"@message": "Foo Bar DB queries"})
-        :arg limit: the number of results (defaults to 10)
-        """
-        query = {
-            "match": match,
-        }
-
-        return self._search(query, limit)
+        self._logger.info("{:d} rows returned".format(rows_cnt))
 
     def query_by_string(self, query, limit=10):
         """
