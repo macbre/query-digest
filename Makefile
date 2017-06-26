@@ -2,4 +2,4 @@ install:
 	pip install -e .
 
 test:
-	pytest test/
+	pytest tests/
