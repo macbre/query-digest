@@ -82,6 +82,43 @@ def get_backend_queries_by_table(table, limit=500000, period=3600):
     return tuple(map(normalize_backend_query_log_entry, entries))
 
 
+def get_sql_queries_by_database(database, limit=500000, period=3600):
+    """
+    Get MediaWiki SQL queries made in the last hour affecting given database
+
+    Please note that SQL queries log is sampled at 1%
+
+    :type database str
+    :type limit int
+    :type period int
+    :rtype tuple
+    """
+    query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
+            'AND @message: "SQL" AND NOT @message: "action=delete" AND @context.db_name:"{}"'.format(database)
+
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki')
+
+    return tuple(map(normalize_mediawiki_query_log_entry, entries))
+
+
+def get_backend_queries_by_database(database, limit=500000, period=3600):
+    """
+    Get Perl backend SQL queries made in the last hour affecting given database
+
+    Please note that SQL queries log is sampled at 1%
+
+    :type database str
+    :type limit int
+    :type period int
+    :rtype tuple
+    """
+    query = 'program:"backend" AND @context.statement: * AND @context.db_name:"{}"'.format(database)
+
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend')
+
+    return tuple(map(normalize_backend_query_log_entry, entries))
+
+
 def get_sql_queries_by_service(service, limit=500000):
     """
     Get Pandora SQL queries made by a given service

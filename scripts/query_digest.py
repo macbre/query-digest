@@ -3,7 +3,7 @@ This is a **dynamic code analysis tool** that processes last hour of **SQL queri
 SJC prod environment and reports those made by given feature or using given table
 
 Usage:
-  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --csv ] [ --data-flow ] [ --simple ] [ --last-24h ]
+  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --database=<database> ] [ --csv ] [ --data-flow ] [ --simple ] [ --last-24h ]
 
 Example:
   query_digest --path=extensions/wikia/Wall
@@ -16,6 +16,8 @@ Example:
 
   query_digest --service=content-entity-worker
   query_digest --service=content-entity-worker --csv
+
+  query_digest --database=statsdb --simple
 
   query_digest --table=wall_notification --simple - simple output type (list queries only)
 """
@@ -33,6 +35,7 @@ from digest.map_reduce import map_reduce
 from digest.math import median
 from digest.queries import \
     get_sql_queries_by_path, get_sql_queries_by_table, get_backend_queries_by_table, get_sql_queries_by_service, \
+    get_sql_queries_by_database, get_backend_queries_by_database, \
     filter_query
 
 
@@ -91,6 +94,7 @@ def main():
     path = arguments.get('--path')
     service = arguments.get('--service')
     table = arguments.get('--table')
+    database = arguments.get('--database')
 
     output_csv = arguments.get('--csv') is True
     simple_output = arguments.get('--simple') is True
@@ -104,6 +108,8 @@ def main():
         logger.info('Digesting queries made by "{}" Pandora service'.format(service))
     elif table is not None:
         logger.info('Digesting queries affecting "{}" table'.format(table))
+    elif database is not None:
+        logger.info('Digesting queries affecting "{}" database'.format(database))
     else:
         raise Exception('Either --path or --table needs to be provided')
 
@@ -114,6 +120,9 @@ def main():
     elif service is not None:
         queries = get_sql_queries_by_service(service, period=period)
         report_header = '"{}" service'.format(service)
+    elif database is not None:
+        queries = get_sql_queries_by_database(database, period=period) + get_backend_queries_by_database(database, period=period)
+        report_header = '"{}" database'.format(database)
     else:
         queries = get_sql_queries_by_table(table, period=period) + get_backend_queries_by_table(table, period=period)
         report_header = '"{}" table'.format(table)
