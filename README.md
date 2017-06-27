@@ -47,7 +47,7 @@ query_digest --service=content-entity-worker --csv
 
 ## Visualizing the data flow
 
-`query-digest` can generated TSV file that can be consumed by [`data-flow-graph`](https://github.com/macbre/data-flow-graph). Simply follow these three steps:
+`query-digest` can generate TSV file that can be consumed by [`data-flow-graph`](https://github.com/macbre/data-flow-graph). Simply follow these three steps:
 
 * run `query_digest` with `--data-flow` option
 * copy generated TSV and pasted it on [Gist](https://gist.github.com/)
