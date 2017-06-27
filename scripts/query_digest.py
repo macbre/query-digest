@@ -102,6 +102,8 @@ def main():
 
     period = 86400 if arguments.get('--last-24h') is True else 3600
 
+    # period = 60  # 10 minutes # DEBUG
+
     if path is not None:
         logger.info('Digesting queries for "{}" path'.format(path))
     elif service is not None:
@@ -167,10 +169,9 @@ def main():
         max_queries = max(item.get('count') for item in data)
 
         stdout.write('# {}\n'.format(report_header))
-        stdout.writelines(map(
-            lambda item: data_flow_format_entry(item, max_queries),
-            data
-        ))
+
+        for item in data:
+            stdout.writelines(data_flow_format_entry(item, max_queries))
     else:
         # @see https://pypi.python.org/pypi/tabulate
         print(report_header)
