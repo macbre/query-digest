@@ -44,6 +44,11 @@ class TestGeneralizeSql(unittest.TestCase):
             "SELECT /* ArticleCommentList::getCommentList *Crashie* */  page_id,page_title  FROM `page`  WHERE (page_title LIKE 'Dainava/@comment-%' ) AND page_namespace = '1201'  ORDER BY page_id DESC") == \
             "SELECT page_id,page_title FROM `page` WHERE (page_title LIKE X ) AND page_namespace = X ORDER BY page_id DESC"
 
+        # comments with * inside
+        assert generalize_sql(
+            "SELECT /* ListusersData::loadData Lart96 - 413bc6e5-b151-44fd-80bd-3baff733fb91 */  count(0) as cnt  FROM `events_local_users`  WHERE wiki_id = '7467' AND (user_name != '') AND user_is_closed = '0' AND ( single_group = 'poweruser' or  all_groups = ''  or  all_groups  LIKE '%bot'  or  all_groups  LIKE '%bot;%'  or  all_groups  LIKE '%bureaucrat'  or  all_groups  LIKE '%bureaucrat;%'  or  all_groups  LIKE '%sysop'  or  all_groups  LIKE '%sysop;%'  or  all_groups  LIKE '%authenticated'  or  all_groups  LIKE '%authenticated;%'  or  all_groups  LIKE '%bot-global'  or  all_groups  LIKE '%bot-global;%'  or  all_groups  LIKE '%content-reviewer'  or  all_groups  LIKE '%content-reviewer;%'  or  all_groups  LIKE '%council'  or  all_groups  LIKE '%council;%'  or  all_groups  LIKE '%fandom-editor'  or  all_groups  LIKE '%fandom-editor;%'  or  all_groups  LIKE '%helper'  or  all_groups  LIKE '%helper;%'  or  all_groups  LIKE '%restricted-login'  or  all_groups  LIKE '%restricted-login;%'  or  all_groups  LIKE '%restricted-login-exempt'  or  all_groups  LIKE '%restricted-login-exempt;%'  or  all_groups  LIKE '%reviewer'  or  all_groups  LIKE '%reviewer;%'  or  all_groups  LIKE '%staff'  or  all_groups  LIKE '%staff;%'  or  all_groups  LIKE '%translator'  or  all_groups  LIKE '%translator;%'  or  all_groups  LIKE '%util'  or  all_groups  LIKE '%util;%'  or  all_groups  LIKE '%vanguard'  or  all_groups  LIKE '%vanguard;%'  or  all_groups  LIKE '%voldev'  or  all_groups  LIKE '%voldev;%'  or  all_groups  LIKE '%vstf'  or  all_groups  LIKE '%vstf;%' ) AND ( edits >= 5)  LIMIT 1  ") == \
+            "SELECT count(N) as cnt FROM `events_local_users` WHERE wiki_id = X AND (user_name != X) AND user_is_closed = X AND ( single_group = X or all_groups = X or all_groups LIKE X ... ) AND ( edits >= N) LIMIT N"
+
         # multiline query
         sql = """
         SELECT page_title
