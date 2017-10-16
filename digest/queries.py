@@ -68,16 +68,16 @@ def get_backend_queries_by_table(table, limit=500000, period=3600):
     """
     Get Perl backend SQL queries made in the last hour affecting given table
 
-    Please note that SQL queries log is sampled at 1%
+    Please note that this SQL queries log is not sampled!
 
     :type table str
     :type limit int
     :type period int
     :rtype tuple
     """
-    query = 'program:"backend" AND @context.statement: * AND @message: "{}"'.format(table)
+    query = 'program:"backend" AND @context.statement: * AND @context.statement: "{}"'.format(table)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend')
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend-sql')
 
     return tuple(map(normalize_backend_query_log_entry, entries))
 
@@ -105,7 +105,7 @@ def get_backend_queries_by_database(database, limit=500000, period=3600):
     """
     Get Perl backend SQL queries made in the last hour affecting given database
 
-    Please note that SQL queries log is sampled at 1%
+    Please note that this SQL queries log is not sampled!
 
     :type database str
     :type limit int
@@ -114,7 +114,7 @@ def get_backend_queries_by_database(database, limit=500000, period=3600):
     """
     query = 'program:"backend" AND @context.statement: * AND @context.db_name:"{}"'.format(database)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend')
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend-sql')
 
     return tuple(map(normalize_backend_query_log_entry, entries))
 
