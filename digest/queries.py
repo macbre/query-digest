@@ -30,17 +30,16 @@ def get_sql_queries_by_path(path, limit=500000, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour from a given code path
 
-    Please note that SQL queries log is sampled at 1%
+    Please note that SQL queries log is sampled at 5%
 
     :type path str
     :type limit int
     :type period int
     :rtype tuple
     """
-    query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "SQL" AND NOT @message: "action=delete" AND @exception.trace: "{}"'.format(path)
+    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" AND @exception.trace: "{}"'.format(path)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki')
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
@@ -49,17 +48,16 @@ def get_sql_queries_by_table(table, limit=500000, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour affecting given table
 
-    Please note that SQL queries log is sampled at 1%
+    Please note that SQL queries log is sampled at 5%
 
     :type table str
     :type limit int
     :type period int
     :rtype tuple
     """
-    query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "SQL" AND NOT @message: "action=delete" AND @message: "{}"'.format(table)
+    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" AND @message: "{}"'.format(table)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki')
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
@@ -86,17 +84,16 @@ def get_sql_queries_by_database(database, limit=500000, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour affecting given database
 
-    Please note that SQL queries log is sampled at 1%
+    Please note that SQL queries log is sampled at 5%
 
     :type database str
     :type limit int
     :type period int
     :rtype tuple
     """
-    query = 'appname: "mediawiki" AND @fields.datacenter: "sjc" AND @fields.environment: "prod" ' + \
-            'AND @message: "SQL" AND NOT @message: "action=delete" AND @context.db_name:"{}"'.format(database)
+    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" AND @context.db_name:"{}"'.format(database)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki')
+    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
     return tuple(map(normalize_mediawiki_query_log_entry, entries))
 
