@@ -125,7 +125,8 @@ def main():
         queries = get_sql_queries_by_service(service, period=period)
         report_header = '"{}" service'.format(service)
     elif database is not None:
-        queries = get_sql_queries_by_database(database, period=period) + get_backend_queries_by_database(database, period=period)
+        queries = get_sql_queries_by_database(database, period=period) + \
+                  get_backend_queries_by_database(database, period=period)
         report_header = '"{}" database'.format(database)
     else:
         queries = get_sql_queries_by_table(table, period=period) + get_backend_queries_by_table(table, period=period)
@@ -148,7 +149,8 @@ def main():
     logger.info('Got {} kinds of queries'.format(len(results)))
 
     # sort the results ordered by "time_sum" descending
-    # results_ordered = sorted(results, key=lambda (_, item): item['time_sum'], reverse=True)  # throws SyntaxError in Python 3.x
+    # throws SyntaxError in Python 3.x
+    # results_ordered = sorted(results, key=lambda (_, item): item['time_sum'], reverse=True)
     data = [entry for (_, entry) in results]
 
     report_header = 'Query digest for {}, found {} queries'.format(report_header, len(queries))

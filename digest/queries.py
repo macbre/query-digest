@@ -116,7 +116,7 @@ def get_backend_queries_by_database(database, limit=500000, period=3600):
     return tuple(map(normalize_backend_query_log_entry, entries))
 
 
-def get_sql_queries_by_service(service, limit=500000):
+def get_sql_queries_by_service(service, limit=500000, period=3600):
     """
     Get Pandora SQL queries made by a given service
 
@@ -124,13 +124,14 @@ def get_sql_queries_by_service(service, limit=500000):
 
     :type service str
     :type limit int
+    :type period int
     :rtype tuple
     """
     query = 'appname:"{}" AND logger_name:"query-log-sampler" AND env: "prod"'.format(service)
 
     entries = get_log_entries(
         query=query,
-        period=3600,  # last hour
+        period=period,
         limit=limit
     )
 
