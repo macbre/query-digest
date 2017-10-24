@@ -27,6 +27,7 @@ import docopt
 import logging
 
 from functools import reduce
+from operator import itemgetter
 
 from csv import DictWriter
 from sys import stdout
@@ -145,13 +146,12 @@ def main():
         map_func=lambda item: '{}-{}'.format(item.get('method'), item.get('source_host')),
         reduce_func=queries_reduce
     )
+    data = [entry for (_, entry) in results]
 
-    logger.info('Got {} kinds of queries'.format(len(results)))
+    logger.info('Got {} kinds of queries'.format(len(data)))
 
     # sort the results ordered by "time_sum" descending
-    # throws SyntaxError in Python 3.x
-    # results_ordered = sorted(results, key=lambda (_, item): item['time_sum'], reverse=True)
-    data = [entry for (_, entry) in results]
+    data = sorted(data, key=itemgetter('time_sum'), reverse=True)
 
     report_header = 'Query digest for {}, found {} queries'.format(report_header, len(queries))
 
