@@ -4,7 +4,7 @@ import re
 from collections import OrderedDict
 from hashlib import md5
 
-from .helpers import generalize_sql
+from .helpers import generalize_sql, remove_comments_from_sql
 from .kibana import Kibana
 
 
@@ -150,7 +150,8 @@ def normalize_mediawiki_query_log_entry(entry):
 
     res = OrderedDict()
 
-    res['query'] = generalize_sql(entry.get('@message').replace('SQL ', ''))
+    res['original_query'] = remove_comments_from_sql(entry.get('@message'))
+    res['query'] = generalize_sql(entry.get('@message'))
 
     # e.g. WikiFactory::loadVariableFromDB (from DesignSystemGlobalNavigationModel:isWikiaOrgCommunity)
     res['method'] = re.sub(r'\s\(([^)]+)\)', '', context.get('method'))
@@ -177,7 +178,8 @@ def normalize_backend_query_log_entry(entry):
 
     res = OrderedDict()
 
-    res['query'] = generalize_sql(entry.get('@message').replace('SQL ', ''))
+    res['original_query'] = remove_comments_from_sql(entry.get('@message'))
+    res['query'] = generalize_sql(entry.get('@message'))
     res['method'] = context.get('method')  # e.g. "DB.pm line 171 via phalanx_stats.pl line 158"
     res['dbname'] = context.get('db_name')  # e.g. "specials"
     res['from_master'] = context.get('server_role', 'slave') == 'master'
@@ -199,6 +201,7 @@ def normalize_pandora_query_log_entry(entry):
     """
     res = OrderedDict()
 
+    res['original_query'] = remove_comments_from_sql(entry.get('rawMessage'))
     res['query'] = generalize_sql(entry.get('rawMessage'))
     res['method'] = entry.get('thread_name')  # TODO: implement in Pandora
     res['dbname'] = entry.get('appname')  # TODO: implement in Pandora

@@ -24,6 +24,16 @@ def normalize_likes(sql):
     return sql
 
 
+def remove_comments_from_sql(sql):
+    """
+    Removes comments from SQL query
+
+    :type sql str|None
+    :rtype str
+    """
+    return re.sub(r'\s?/\*.+\*/', '', sql)
+
+
 def generalize_sql(sql):
     """
     Removes most variables from an SQL query and replaces them with X or N for numbers.
@@ -41,7 +51,7 @@ def generalize_sql(sql):
 
     # MW comments
     # e.g. /* CategoryDataService::getMostVisited N.N.N.N */
-    sql = re.sub(r'\s?/\*.+\*/', '', sql)
+    sql = remove_comments_from_sql(sql)
 
     # handle LIKE statements
     sql = normalize_likes(sql)

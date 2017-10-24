@@ -20,6 +20,7 @@ It then reports the following:
 * `--simple` will emit a simplified view
 * `--csv` will emit CSV-formatted statistics for further processing
 * `--data-flow` will emit TSV [suitable for visualization](https://github.com/macbre/data-flow-graph) ([**an example**](https://macbre.github.io/data-flow-graph/gist.html#29e4e18743b863540ada31d66af80eff))
+* `--sql-log` will emit real queries SQL log [suitable as `index-digest` input](https://github.com/macbre/index-digest)
 
 ## Install
 
@@ -43,6 +44,8 @@ query_digest --table=image_review --data-flow
 
 query_digest --service=content-entity-worker
 query_digest --service=content-entity-worker --csv
+
+query_digest --database=statsdb --sql-log
 ```
 
 ## Visualizing the data flow

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 import unittest
-from digest.helpers import generalize_sql
+from digest.helpers import generalize_sql, remove_comments_from_sql
 
 
 class TestGeneralizeSql(unittest.TestCase):
@@ -11,6 +11,8 @@ class TestGeneralizeSql(unittest.TestCase):
     """
     def test_generalize_sql(self):
         assert generalize_sql(None) is None
+
+        assert remove_comments_from_sql('SELECT /* Test */ foo FROM BAR') == 'SELECT foo FROM BAR'
 
         assert generalize_sql(
             "UPDATE  `category` SET cat_pages = cat_pages + 1,cat_files = cat_files + 1 WHERE cat_title = 'foo'") == \

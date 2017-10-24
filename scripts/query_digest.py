@@ -3,7 +3,7 @@ This is a **dynamic code analysis tool** that processes last hour of **SQL queri
 SJC prod environment and reports those made by given feature or using given table
 
 Usage:
-  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --database=<database> ] [ --csv ] [ --data-flow ] [ --simple ] [ --last-24h ]
+  query_digest [ --path=<path> ] [ --table=<table> ] [ --service=<service> ] [ --database=<database> ] [ --csv ] [ --data-flow ] [ --simple ] [ --sql-log ] [ --last-24h ]
 
 Example:
   query_digest --path=extensions/wikia/Wall
@@ -18,6 +18,7 @@ Example:
   query_digest --service=content-entity-worker --csv
 
   query_digest --database=statsdb --simple
+  query_digest --database=statsdb --sql-log
 
   query_digest --table=wall_notification --simple - simple output type (list queries only)
 """
@@ -102,6 +103,7 @@ def main():
     output_csv = arguments.get('--csv') is True
     simple_output = arguments.get('--simple') is True
     data_flow_output = arguments.get('--data-flow') is True
+    sql_log_output = arguments.get('--sql-log') is True
 
     period = 86400 if arguments.get('--last-24h') is True else 3600
 
@@ -152,6 +154,7 @@ def main():
 
     # sort the results ordered by "time_sum" descending
     data = sorted(data, key=itemgetter('time_sum'), reverse=True)
+    # print(data)
 
     report_header = 'Query digest for {}, found {} queries'.format(report_header, len(queries))
 
@@ -177,6 +180,12 @@ def main():
 
         for item in data:
             stdout.writelines(data_flow_format_entry(item, max_queries))
+    # --sql-log
+    elif sql_log_output:
+        print('-- {}'.format(report_header))
+        stdout.writelines([
+            '{}\n'.format(entry.get('original_query')) for entry in data
+        ])
     else:
         # @see https://pypi.python.org/pypi/tabulate
         print(report_header)
