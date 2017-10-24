@@ -153,7 +153,7 @@ def normalize_mediawiki_query_log_entry(entry):
     res['query'] = generalize_sql(entry.get('@message').replace('SQL ', ''))
 
     # e.g. WikiFactory::loadVariableFromDB (from DesignSystemGlobalNavigationModel:isWikiaOrgCommunity)
-    res['method'] = re.sub(r'\s\(([^\)]+)\)', '', context.get('method'))
+    res['method'] = re.sub(r'\s\(([^)]+)\)', '', context.get('method'))
 
     res['dbname'] = 'local' if fields.get('wiki_dbname') == context.get('db_name') else context.get('db_name')
     res['from_master'] = context.get('server_role', 'slave') == 'master'
