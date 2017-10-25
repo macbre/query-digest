@@ -127,12 +127,13 @@ def get_sql_queries_by_service(service, limit=500000, period=3600):
     :type period int
     :rtype tuple
     """
-    query = 'appname:"{}" AND logger_name:"query-log-sampler" AND env: "prod"'.format(service)
+    query = 'logger_name:"query-log-sampler" AND env: "prod" AND raw_query: *'.format(service)
 
     entries = get_log_entries(
         query=query,
         period=period,
-        limit=limit
+        limit=limit,
+        index_prefix='logstash-{}'.format(service)
     )
 
     return tuple(map(normalize_pandora_query_log_entry, entries))
@@ -196,23 +197,28 @@ def normalize_pandora_query_log_entry(entry):
     """
     Normalizes given Pandora query log entry and keeps only needed fields
 
+    logger_name: "query-log-sampler"
+
     :type entry dict
     :return: dict
     """
     res = OrderedDict()
 
-    res['original_query'] = remove_comments_from_sql(entry.get('rawMessage'))
-    res['query'] = generalize_sql(entry.get('rawMessage'))
-    res['method'] = entry.get('thread_name')  # TODO: implement in Pandora
-    res['dbname'] = entry.get('appname')  # TODO: implement in Pandora
+    query = entry.get('raw_query')
+    k8s = entry.get('kubernetes', {})
 
-    res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. mesos
+    res['original_query'] = remove_comments_from_sql(query)
+    res['query'] = generalize_sql(query)
+    # res['method'] = k8s.get('container_name')  # e.g liftigniter-metadata
+    res['dbname'] = entry.get('container_name')  # TODO: implement in Pandora
 
-    res['rows'] = int(entry.get('numRows', 0))
-    res['time'] = float(entry.get('execTimeMs', 0))  # [ms]
+    res['source_host'] = k8s.get('host').split('-')[0]  # e.g. k8s-worker-s3 -> k8
+
+    res['rows'] = int(entry.get('rows_number', 0))
+    res['time'] = float(entry.get('execution_time', 0))  # [ms]
 
     # use a short md5 hash of normalized SQL method to generate the method name
-    res['method'] = md5(res['query']).hexdigest()[0:8]
+    res['method'] = md5(res['query'].encode('utf8')).hexdigest()[0:8]
 
     return res
 

@@ -14,8 +14,8 @@ Example:
   query_digest --table=wall_notification --csv
   query_digest --table=image_view --data-flow
 
-  query_digest --service=content-entity-worker
-  query_digest --service=content-entity-worker --csv
+  query_digest --service=liftigniter-metadata
+  query_digest --service=liftigniter-metadata --csv
 
   query_digest --database=statsdb --simple
   query_digest --database=statsdb --sql-log
