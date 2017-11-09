@@ -25,6 +25,9 @@ It then reports the following:
 ## Install
 
 ```bash
+sudo apt-get install python-pip virtualenv
+virtualenv env
+source env/bin/activate
 make install
 ```
 
@@ -33,7 +36,6 @@ make install
 > `DEBUG=1` env variable will enable debug level logging
 
 ```
-source env/bin/activate
 query-digest --path="/extensions/wikia/Wall"
 query-digest --path="/extensions/wikia/Wall" --csv
 
