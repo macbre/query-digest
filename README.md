@@ -25,6 +25,9 @@ It then reports the following:
 ## Install
 
 ```bash
+sudo apt-get install python-pip virtualenv
+virtualenv env
+source env/bin/activate
 make install
 ```
 
@@ -33,9 +36,8 @@ make install
 > `DEBUG=1` env variable will enable debug level logging
 
 ```
-source env/bin/activate
-query-digest --path="/extensions/wikia/Wall"
-query-digest --path="/extensions/wikia/Wall" --csv
+query_digest --path="/extensions/wikia/Wall"
+query_digest --path="/extensions/wikia/Wall" --csv
 
 query_digest --table=wall_notification
 query_digest --table=wall_notification --csv
@@ -52,7 +54,7 @@ query_digest --database=statsdb --sql-log
 
 ![](https://raw.githubusercontent.com/macbre/data-flow-graph/master/docs/data-flow-example.png)
 
-`query-digest` generates TSV file that can be consumed by [`data-flow-graph`](https://github.com/macbre/data-flow-graph). Simply follow these three steps:
+`query_digest` generates TSV file that can be consumed by [`data-flow-graph`](https://github.com/macbre/data-flow-graph). Simply follow these three steps:
 
 * run `query_digest` with `--data-flow` option
 * copy generated TSV and pasted it on [Gist](https://gist.github.com/)
