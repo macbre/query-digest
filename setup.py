@@ -16,6 +16,7 @@ setup(
         "elasticsearch>=5.0.0,<6.0.0",
         "python-dateutil==2.2",
         'pytest==3.1.2',
+        'sql_metadata==1.0',
     ],
     include_package_data=True,
     entry_points={

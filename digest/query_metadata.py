@@ -1,5 +1,7 @@
 import re
 
+from sql_metadata import get_query_tables
+
 
 def get_query_metadata(query):
     """
@@ -15,8 +17,11 @@ def get_query_metadata(query):
     if kind in ['BEGIN', 'COMMIT', 'SHOW', 'SET']:
         return kind, None
 
+    if kind == 'SELECT':
+        return kind, tuple(get_query_tables(query))
+
     try:
-        # SELECT FROM, INSERT INTO, DELETE FROM
+        # INSERT INTO, DELETE FROM
         matches = re.search(r'(FROM|INTO) ([`,.\w]+)', query, flags=re.IGNORECASE)
 
         # multi-table SELECTS
