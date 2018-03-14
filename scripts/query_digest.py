@@ -184,7 +184,7 @@ def main():
     elif sql_log_output:
         print('-- {}'.format(report_header))
         stdout.writelines([
-            '{}\n'.format(entry.get('original_query', '').replace("\n", ' ').encode('utf-8')) for entry in data
+            '/* {} */ {}\n'.format(entry.get('method'), entry.get('original_query', '').replace("\n", ' ').encode('utf-8')) for entry in data
         ])
     else:
         # @see https://pypi.python.org/pypi/tabulate
