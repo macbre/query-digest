@@ -116,7 +116,7 @@ def get_backend_queries_by_database(database, limit=500000, period=3600):
     return tuple(map(normalize_backend_query_log_entry, entries))
 
 
-def get_sql_queries_by_service(service, limit=500000, period=3600):
+def get_sql_queries_by_service(service, limit=25000, period=3600):
     """
     Get Pandora SQL queries made by a given service
 
