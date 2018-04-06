@@ -61,3 +61,35 @@ class TestGeneralizeSql(unittest.TestCase):
 
         assert generalize_sql(sql) == \
             "SELECT page_title FROM page WHERE page_namespace = X AND page_title COLLATE LATINN_GENERAL_CI LIKE X"
+
+        # queries with IN + brackets (#21)
+        assert generalize_sql(
+            'SELECT foo FROM bar WHERE id IN (123,456, 789)') == \
+            'SELECT foo FROM bar WHERE id IN (XYZ)'
+
+        assert generalize_sql(
+            'SELECT foo FROM bar WHERE id in ( 123, 456, 789 )') == \
+            'SELECT foo FROM bar WHERE id in (XYZ)'
+
+        assert generalize_sql(
+            "SELECT foo FROM bar WHERE slug in (         'american-horror-story', 'animated-series', 'batman', 'comics', 'dc', 'fallout',          'game-of-thrones', 'hbo', 'horror', 'marvel', 'mcu', 'movie-reviews', 'movie-trailers',          'movies', 'netflix', 'playstation', 'star-wars', 'stranger-things', 'streaming',          'the-simpsons', 'zelda'       )") == \
+            'SELECT foo FROM bar WHERE slug in (XYZ)'
+
+        assert generalize_sql(
+            'select curation_cms.topics.slug from curation_cms.topics where curation_cms.topics.id in (   87, 86, 79, 77, 76, 73, 72, 70, 71, 69, 68, 66, 65, 64, 62, 63, 2, 57, 17, 1,    22, 49, 30, 55, 15, 3, 48, 43, 24, 47, 45, 10, 50, 39, 36, 8, 34, 25, 13, 6, 4 )') == \
+            'select curation_cms.topics.slug from curation_cms.topics where curation_cms.topics.id in (XYZ)'
+
+    def test_generalize_timestamp(self):
+            assert generalize_sql(
+            # ODBC syntax - https://dev.mysql.com/doc/refman/5.7/en/date-and-time-literals.html
+            "SELECT foo FROM bar WHERE publish_date < {ts '2018-04-05 10:14:33.824'}") == \
+            'SELECT foo FROM bar WHERE publish_date < {ts X}'
+
+    def test_generalize_insert(self):
+        assert generalize_sql(
+            'INSERT INTO bar (foo, test) Values ( 123, 456, 789 )') == \
+            'INSERT INTO bar (foo, test) Values (XYZ)'
+
+        assert generalize_sql(
+            "/* 7e6384e5 */ insert into notification_stats.request_info (   type,    request_id,    title,    message,    details ) values (   'action-notification',    '51f8a962-bae0-4d25-9341-130658161541',    'RickSanchez15 replied to What''s your overall favourite Season of South Park?.',    'Cool',    'null' )") == \
+            'insert into notification_stats.request_info ( type, request_id, title, message, details ) values (XYZ)'
