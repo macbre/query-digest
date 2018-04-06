@@ -61,3 +61,20 @@ class TestGeneralizeSql(unittest.TestCase):
 
         assert generalize_sql(sql) == \
             "SELECT page_title FROM page WHERE page_namespace = X AND page_title COLLATE LATINN_GENERAL_CI LIKE X"
+
+        # queries with IN + brackets (#21)
+        assert generalize_sql(
+            'SELECT foo FROM bar WHERE id IN (123,456, 789)') == \
+            'SELECT foo FROM bar WHERE id IN (XYZ)'
+
+        assert generalize_sql(
+            'SELECT foo FROM bar WHERE id in ( 123, 456, 789 )') == \
+            'SELECT foo FROM bar WHERE id in (XYZ)'
+
+        assert generalize_sql(
+            "SELECT foo FROM bar WHERE slug in (         'american-horror-story', 'animated-series', 'batman', 'comics', 'dc', 'fallout',          'game-of-thrones', 'hbo', 'horror', 'marvel', 'mcu', 'movie-reviews', 'movie-trailers',          'movies', 'netflix', 'playstation', 'star-wars', 'stranger-things', 'streaming',          'the-simpsons', 'zelda'       )") == \
+            'SELECT foo FROM bar WHERE slug in (XYZ)'
+
+        assert generalize_sql(
+            'select curation_cms.topics.slug from curation_cms.topics where curation_cms.topics.id in (   87, 86, 79, 77, 76, 73, 72, 70, 71, 69, 68, 66, 65, 64, 62, 63, 2, 57, 17, 1,    22, 49, 30, 55, 15, 3, 48, 43, 24, 47, 45, 10, 50, 39, 36, 8, 34, 25, 13, 6, 4 )') == \
+            'select curation_cms.topics.slug from curation_cms.topics where curation_cms.topics.id in (XYZ)'
