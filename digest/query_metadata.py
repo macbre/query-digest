@@ -35,7 +35,7 @@ def get_query_metadata(query):
             tables += matches
 
         # table names cleanup
-        tables = map(lambda table: table.replace('`', ''), tables)
+        tables = [table.replace('`', '') for table in tables]
 
         return kind, tuple(tables)
     except AttributeError:
