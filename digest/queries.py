@@ -24,7 +24,7 @@ def get_log_entries(query, period, limit, index_prefix='logstash-other'):
     logger = logging.getLogger('get_log_entries')
     source = Kibana(period=period, index_prefix=index_prefix)
 
-    logger.info('Query: \'{}\' for the last {} hour(s)'.format(query, period / 3600))
+    logger.info('Query: \'%s\' for the last %d hour(s)', query, period / 3600)
 
     return source.query_by_string(query, limit)
 
@@ -40,7 +40,8 @@ def get_sql_queries_by_path(path, limit=500000, period=3600):
     :type period int
     :rtype tuple
     """
-    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" AND @exception.trace: "{}"'.format(path)
+    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" ' \
+            'AND @exception.trace: "{}"'.format(path)
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
@@ -58,7 +59,8 @@ def get_sql_queries_by_table(table, limit=500000, period=3600):
     :type period int
     :rtype tuple
     """
-    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" AND @message: "{}"'.format(table)
+    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" ' \
+            'AND @message: "{}"'.format(table)
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
@@ -94,7 +96,8 @@ def get_sql_queries_by_database(database, limit=500000, period=3600):
     :type period int
     :rtype tuple
     """
-    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" AND @context.db_name:"{}"'.format(database)
+    query = '@fields.datacenter: "sjc" AND @fields.environment: "prod"' \
+            ' AND @context.db_name:"{}"'.format(database)
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
@@ -157,10 +160,11 @@ def normalize_mediawiki_entry(entry):
     res['original_query'] = remove_comments_from_sql(entry.get('@message'))
     res['query'] = generalize_sql(entry.get('@message'))
 
-    # e.g. WikiFactory::loadVariableFromDB (from DesignSystemGlobalNavigationModel:isWikiaOrgCommunity)
+    # e.g. WikiFactory::loadVariableFromDB (from foo::bar)
     res['method'] = re.sub(r'\s\(([^)]+)\)', '', context.get('method'))
 
-    res['dbname'] = 'local' if fields.get('wiki_dbname') == context.get('db_name') else context.get('db_name')
+    res['dbname'] = 'local' if fields.get('wiki_dbname') == context.get('db_name') \
+        else context.get('db_name')
     res['from_master'] = context.get('server_role', 'slave') == 'master'
 
     res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. ap / cron / task
