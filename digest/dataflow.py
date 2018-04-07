@@ -1,3 +1,6 @@
+"""
+Helper function used to format TSV-like entry for data flow file
+"""
 import logging
 import re
 
