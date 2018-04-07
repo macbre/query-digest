@@ -29,11 +29,6 @@ def get_query_metadata(query):
         # SELECT * FROM foo,bar,test
         tables = matches.group(2).split(',')
 
-        # now it's time to handle JOINs
-        matches = re.findall(r'JOIN ([`,.\w]+) ON', query, flags=re.IGNORECASE)
-        if matches:
-            tables += matches
-
         # table names cleanup
         tables = [table.replace('`', '') for table in tables]
 
