@@ -1,3 +1,6 @@
+"""
+Fetch SQL queries from elasticsearch
+"""
 import logging
 import re
 
@@ -41,7 +44,7 @@ def get_sql_queries_by_path(path, limit=500000, period=3600):
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
-    return tuple(map(normalize_mediawiki_query_log_entry, entries))
+    return tuple(map(normalize_mediawiki_entry, entries))
 
 
 def get_sql_queries_by_table(table, limit=500000, period=3600):
@@ -59,7 +62,7 @@ def get_sql_queries_by_table(table, limit=500000, period=3600):
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
-    return tuple(map(normalize_mediawiki_query_log_entry, entries))
+    return tuple(map(normalize_mediawiki_entry, entries))
 
 
 def get_backend_queries_by_table(table, limit=500000, period=3600):
@@ -77,7 +80,7 @@ def get_backend_queries_by_table(table, limit=500000, period=3600):
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-backend-sql')
 
-    return tuple(map(normalize_backend_query_log_entry, entries))
+    return tuple(map(normalize_backend_entry, entries))
 
 
 def get_sql_queries_by_database(database, limit=500000, period=3600):
@@ -95,7 +98,7 @@ def get_sql_queries_by_database(database, limit=500000, period=3600):
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
 
-    return tuple(map(normalize_mediawiki_query_log_entry, entries))
+    return tuple(map(normalize_mediawiki_entry, entries))
 
 
 def get_backend_queries_by_database(database, limit=500000, period=3600):
@@ -113,7 +116,7 @@ def get_backend_queries_by_database(database, limit=500000, period=3600):
 
     entries = get_log_entries(query, period, limit, index_prefix='logstash-backend-sql')
 
-    return tuple(map(normalize_backend_query_log_entry, entries))
+    return tuple(map(normalize_backend_entry, entries))
 
 
 def get_sql_queries_by_service(service, limit=25000, period=3600):
@@ -127,7 +130,7 @@ def get_sql_queries_by_service(service, limit=25000, period=3600):
     :type period int
     :rtype tuple
     """
-    query = 'logger_name:"query-log-sampler" AND env: "prod" AND raw_query: *'.format(service)
+    query = 'logger_name:"query-log-sampler" AND env: "prod" AND raw_query: *'
 
     entries = get_log_entries(
         query=query,
@@ -136,10 +139,10 @@ def get_sql_queries_by_service(service, limit=25000, period=3600):
         index_prefix='logstash-{}'.format(service)
     )
 
-    return tuple(map(normalize_pandora_query_log_entry, entries))
+    return tuple(map(normalize_pandora_entry, entries))
 
 
-def normalize_mediawiki_query_log_entry(entry):
+def normalize_mediawiki_entry(entry):
     """
     Normalizes given MediaWiki query log entry and keeps only needed fields
 
@@ -168,7 +171,7 @@ def normalize_mediawiki_query_log_entry(entry):
     return res
 
 
-def normalize_backend_query_log_entry(entry):
+def normalize_backend_entry(entry):
     """
     Normalizes given backend query log entry and keeps only needed fields
 
@@ -193,7 +196,7 @@ def normalize_backend_query_log_entry(entry):
     return res
 
 
-def normalize_pandora_query_log_entry(entry):
+def normalize_pandora_entry(entry):
     """
     Normalizes given Pandora query log entry and keeps only needed fields
 
