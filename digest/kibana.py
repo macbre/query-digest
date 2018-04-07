@@ -6,19 +6,26 @@ import json
 import logging
 import time
 
+from itertools import islice
+
 from datetime import datetime
 from dateutil import tz
-from itertools import islice
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 
 
 class KibanaError(Exception):
+    """
+    Class for Kibana-related errors
+    """
     pass
 
 
 class Kibana(object):
+    """
+    Access elasticsearch instance that Kibana front-end uses
+    """
     # give 5 seconds for all log messages to reach logstash and be stored in elasticsearch
     SHORT_DELAY = 5
 
@@ -55,7 +62,7 @@ class Kibana(object):
             since = now - period
         else:
             since += 1
-            self._logger.info("Using provided {0} timestamp as since ({1} seconds ago)".format(since, now - since))
+            self._logger.info("Using provided %s timestamp as since (%d seconds ago)", since, now - since)
 
         self._since = since
         self._to = now - self.SHORT_DELAY  # give logs some time to reach Logstash
@@ -67,24 +74,24 @@ class Kibana(object):
             self.format_index(index_prefix, now),
         ])
 
-        self._logger.info("Using {} indices".format(self._index))
-        self._logger.info("Querying for messages from between {} and {}".
-                          format(self.format_timestamp(self._since), self.format_timestamp(self._to)))
+        self._logger.info("Using %s indices", self._index)
+        self._logger.info("Querying for messages from between %s and %s",
+                          self.format_timestamp(self._since), self.format_timestamp(self._to))
 
     @staticmethod
-    def format_index(prefix, ts):
+    def format_index(prefix, timestamp):
         """
         :type prefix str
-        :type ts int
+        :type timestamp int
         :rtype: str
         """
         tz_info = tz.tzutc()
 
         # ex. logstash-other-2017.05.09
-        return "{prefix}-{date}".format(prefix=prefix, date=datetime.fromtimestamp(ts, tz=tz_info).strftime('%Y.%m.%d'))
+        return "{prefix}-{date}".format(prefix=prefix, date=datetime.fromtimestamp(timestamp, tz=tz_info).strftime('%Y.%m.%d'))
 
     @staticmethod
-    def format_timestamp(ts):
+    def format_timestamp(timestamp):
         """
         Format the UTC timestamp for Elasticsearch
         eg. 2014-07-09T08:37:18.000Z
@@ -92,7 +99,7 @@ class Kibana(object):
         @see https://docs.python.org/2/library/time.html#time.strftime
         """
         tz_info = tz.tzutc()
-        return datetime.fromtimestamp(ts, tz=tz_info).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        return datetime.fromtimestamp(timestamp, tz=tz_info).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     def _get_timestamp_filer(self):
         return {
