@@ -1,3 +1,6 @@
+"""
+Map-reduce implementation
+"""
 from collections import defaultdict
 
 

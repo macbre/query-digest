@@ -1,3 +1,6 @@
+"""
+Given SQL query returns its type and tables involved
+"""
 import re
 
 from sql_metadata import get_query_tables
@@ -5,8 +8,6 @@ from sql_metadata import get_query_tables
 
 def get_query_metadata(query):
     """
-    TODO: use https://pypi.python.org/pypi/sqlparse
-
     :type query: string
     :rtype list
     :raises ValueError
@@ -28,13 +29,8 @@ def get_query_metadata(query):
         # SELECT * FROM foo,bar,test
         tables = matches.group(2).split(',')
 
-        # now it's time to handle JOINs
-        matches = re.findall(r'JOIN ([`,.\w]+) ON', query, flags=re.IGNORECASE)
-        if matches:
-            tables += matches
-
         # table names cleanup
-        tables = map(lambda table: table.replace('`', ''), tables)
+        tables = [table.replace('`', '') for table in tables]
 
         return kind, tuple(tables)
     except AttributeError:
@@ -42,7 +38,9 @@ def get_query_metadata(query):
 
     try:
         # UPDATE foo SET ...
-        matches = re.search(r'([`\w]+) SET', query, flags=re.IGNORECASE) if kind == 'UPDATE' else None
+        matches = re.search(r'([`\w]+) SET', query, flags=re.IGNORECASE) \
+            if kind == 'UPDATE' else None
+
         return kind, (matches.group(1).strip('`'),)
     except AttributeError:
         pass

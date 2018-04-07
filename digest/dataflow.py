@@ -1,9 +1,10 @@
+"""
+Helper function used to format TSV-like entry for data flow file
+"""
 import logging
 import re
 
 from .query_metadata import get_query_metadata
-
-logger = logging.getLogger('dataflow')
 
 
 def data_flow_format_entry(entry, max_queries):
@@ -30,13 +31,15 @@ def data_flow_format_entry(entry, max_queries):
     # ('rows_median', 8.0)]) 379
     # print(entry, max_queries)
 
+    logger = logging.getLogger('dataflow')
+
     # get query metadata (kind and tables involved
     query = entry.get('query')
 
     try:
         (kind, tables) = get_query_metadata(query)
     except ValueError:
-        logger.error('Unable to parse query metadata: ' + query, exc_info=True)
+        logger.error('Unable to parse query metadata: %s', query, exc_info=True)
         return
 
     # do not include BEGIN, COMMIT and STATUS queries
@@ -52,7 +55,9 @@ def data_flow_format_entry(entry, max_queries):
             matches = re.search(r' via ([^\s]+) line (\d+)', method)
 
             target = 'backend:{}'.format(matches.group(1))  # backend:fiximagereview.pl
-            edge = '{}:{} ({})'.format(matches.group(1), matches.group(2), kind)  # fiximagereview.pl:123 (SELECT)
+
+            # fiximagereview.pl:123 (SELECT)
+            edge = '{}:{} ({})'.format(matches.group(1), matches.group(2), kind)
         elif ':' not in method:
             # wfFunctionName
             target = edge = method
@@ -60,7 +65,7 @@ def data_flow_format_entry(entry, max_queries):
             # PHP method names (Foo::get_bar / FavoriteWikisModel:getTopWikisFromDb)
             (target, edge) = method.rsplit('::' if '::' in method else ':', 1)
     except ValueError:
-        logger.error('Unable to parse method name: ' + method, exc_info=True)
+        logger.error('Unable to parse method name: %s', method, exc_info=True)
         return
 
     for table in tables:
