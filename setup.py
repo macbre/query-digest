@@ -12,16 +12,14 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'tabulate==0.8.2',
-        # 'wikia.common.kibana==2.1.2',
-        "elasticsearch>=5.0.0,<6.0.0",
-        "python-dateutil==2.2",
+        'wikia-common-kibana==2.2.4',
         'sql_metadata==1.1.2',
     ],
     extras_require={
         'dev': [
             'coverage==4.5.1',
-            'pylint==1.8.2',
-            'pytest==3.4.0',
+            'pylint==1.8.4',
+            'pytest==3.5.1',
         ]
     },
     include_package_data=True,

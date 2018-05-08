@@ -6,9 +6,9 @@ import re
 
 from collections import OrderedDict
 from hashlib import md5
+from wikia_common_kibana import Kibana
 
 from .helpers import generalize_sql, remove_comments_from_sql
-from .kibana import Kibana
 
 
 def get_log_entries(query, period, limit, index_prefix='logstash-other'):
