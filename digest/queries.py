@@ -10,6 +10,8 @@ from wikia_common_kibana import Kibana
 
 from .helpers import generalize_sql, remove_comments_from_sql
 
+QUERIES_LIMIT = 50000
+
 
 def get_log_entries(query, period, fields, limit, index_prefix='logstash-other'):
     """
@@ -30,7 +32,7 @@ def get_log_entries(query, period, fields, limit, index_prefix='logstash-other')
     return source.query_by_string(query, fields, limit)
 
 
-def get_sql_queries_by_path(path, limit=500000, period=3600):
+def get_sql_queries_by_path(path, limit=QUERIES_LIMIT, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour from a given code path
 
@@ -60,7 +62,7 @@ def get_sql_queries_by_path(path, limit=500000, period=3600):
     return tuple(map(normalize_mediawiki_entry, entries))
 
 
-def get_sql_queries_by_table(table, limit=500000, period=3600):
+def get_sql_queries_by_table(table, limit=QUERIES_LIMIT, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour affecting given table
 
@@ -90,7 +92,7 @@ def get_sql_queries_by_table(table, limit=500000, period=3600):
     return tuple(map(normalize_mediawiki_entry, entries))
 
 
-def get_backend_queries_by_table(table, limit=500000, period=3600):
+def get_backend_queries_by_table(table, limit=QUERIES_LIMIT, period=3600):
     """
     Get Perl backend SQL queries made in the last hour affecting given table
 
@@ -118,7 +120,7 @@ def get_backend_queries_by_table(table, limit=500000, period=3600):
     return tuple(map(normalize_backend_entry, entries))
 
 
-def get_sql_queries_by_database(database, limit=500000, period=3600):
+def get_sql_queries_by_database(database, limit=QUERIES_LIMIT, period=3600):
     """
     Get MediaWiki SQL queries made in the last hour affecting given database
 
@@ -148,7 +150,7 @@ def get_sql_queries_by_database(database, limit=500000, period=3600):
     return tuple(map(normalize_mediawiki_entry, entries))
 
 
-def get_backend_queries_by_database(database, limit=500000, period=3600):
+def get_backend_queries_by_database(database, limit=QUERIES_LIMIT, period=3600):
     """
     Get Perl backend SQL queries made in the last hour affecting given database
 
