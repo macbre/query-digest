@@ -11,12 +11,13 @@ from wikia_common_kibana import Kibana
 from .helpers import generalize_sql, remove_comments_from_sql
 
 
-def get_log_entries(query, period, limit, index_prefix='logstash-other'):
+def get_log_entries(query, period, fields, limit, index_prefix='logstash-other'):
     """
     Get log entries from elasticsearch that match given query
 
     :type query str
     :type period int
+    :type fields list[str] or None
     :type limit int
     :type index_prefix str
     :rtype tuple
@@ -26,7 +27,7 @@ def get_log_entries(query, period, limit, index_prefix='logstash-other'):
 
     logger.info('Query: \'%s\' for the last %d hour(s)', query, period / 3600)
 
-    return source.query_by_string(query, limit)
+    return source.query_by_string(query, fields, limit)
 
 
 def get_sql_queries_by_path(path, limit=500000, period=3600):
@@ -43,7 +44,18 @@ def get_sql_queries_by_path(path, limit=500000, period=3600):
     query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" ' \
             'AND @exception.trace: "{}"'.format(path)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
+    fields = [
+        '@message',
+        '@context.method',
+        '@context.db_name',
+        '@context.server_role',
+        '@context.num_rows',
+        '@context.elapsed',
+        '@fields.wiki_dbname',
+        '@source_host',
+    ]
+
+    entries = get_log_entries(query, period, fields, limit, index_prefix='logstash-mediawiki-sql')
 
     return tuple(map(normalize_mediawiki_entry, entries))
 
@@ -62,7 +74,18 @@ def get_sql_queries_by_table(table, limit=500000, period=3600):
     query = '@fields.datacenter: "sjc" AND @fields.environment: "prod" ' \
             'AND @message: "{}"'.format(table)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
+    fields = [
+        '@message',
+        '@context.method',
+        '@context.db_name',
+        '@context.server_role',
+        '@context.num_rows',
+        '@context.elapsed',
+        '@fields.wiki_dbname',
+        '@source_host',
+    ]
+
+    entries = get_log_entries(query, period, fields, limit, index_prefix='logstash-mediawiki-sql')
 
     return tuple(map(normalize_mediawiki_entry, entries))
 
@@ -80,7 +103,17 @@ def get_backend_queries_by_table(table, limit=500000, period=3600):
     """
     query = 'program:"backend" AND @context.statement: * AND @context.statement: "{}"'.format(table)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend-sql')
+    fields = [
+        '@message',
+        '@context.method',
+        '@context.db_name',
+        '@context.server_role',
+        '@context.num_rows',
+        '@context.elapsed',
+        '@source_host',
+    ]
+
+    entries = get_log_entries(query, period, fields, limit, index_prefix='logstash-backend-sql')
 
     return tuple(map(normalize_backend_entry, entries))
 
@@ -99,7 +132,18 @@ def get_sql_queries_by_database(database, limit=500000, period=3600):
     query = '@fields.datacenter: "sjc" AND @fields.environment: "prod"' \
             ' AND @context.db_name:"{}"'.format(database)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-mediawiki-sql')
+    fields = [
+        '@message',
+        '@context.method',
+        '@context.db_name',
+        '@context.server_role',
+        '@context.num_rows',
+        '@context.elapsed',
+        '@fields.wiki_dbname',
+        '@source_host',
+    ]
+
+    entries = get_log_entries(query, period, fields, limit, index_prefix='logstash-mediawiki-sql')
 
     return tuple(map(normalize_mediawiki_entry, entries))
 
@@ -117,7 +161,17 @@ def get_backend_queries_by_database(database, limit=500000, period=3600):
     """
     query = 'program:"backend" AND @context.statement: * AND @context.db_name:"{}"'.format(database)
 
-    entries = get_log_entries(query, period, limit, index_prefix='logstash-backend-sql')
+    fields = [
+        '@message',
+        '@context.method',
+        '@context.db_name',
+        '@context.server_role',
+        '@context.num_rows',
+        '@context.elapsed',
+        '@source_host',
+    ]
+
+    entries = get_log_entries(query, period, fields, limit, index_prefix='logstash-backend-sql')
 
     return tuple(map(normalize_backend_entry, entries))
 
@@ -138,6 +192,13 @@ def get_sql_queries_by_service(service, limit=25000, period=3600):
     entries = get_log_entries(
         query=query,
         period=period,
+        fields=[
+            'raw_query',
+            'container_name',
+            'kubernetes.host',
+            'rows_number',
+            'execution_time',
+        ],
         limit=limit,
         index_prefix='logstash-{}'.format(service)
     )
