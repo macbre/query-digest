@@ -230,7 +230,7 @@ def normalize_mediawiki_entry(entry):
         else context.get('db_name')
     res['from_master'] = context.get('server_role', 'slave') == 'master'
 
-    res['source_host'] = entry.get('@source_host').split('-')[0]  # e.g. ap / cron / task
+    res['source_host'] = entry.get('@source_host', 'ap').split('-')[0]  # e.g. ap / cron / task
 
     res['rows'] = int(context.get('num_rows', 0))
     res['time'] = float(1000. * context.get('elapsed', 0))  # [ms]
