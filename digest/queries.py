@@ -302,5 +302,5 @@ def filter_query(entry):
     """
     query = entry['query']
 
-    return 'BEGIN' not in query and 'COMMIT' not in query and 'SHOW SLAVE STATUS' not in query \
+    return 'BEGIN' not in query and 'COMMIT' not in query and not query.startswith('SHOW') \
         and not query.startswith('Important table write')
