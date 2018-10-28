@@ -1,11 +1,10 @@
 coverage_options = --include='digest/*' --omit='test/*'
 
 install:
-	pip install -e .
 	pip install -e .[dev]
 
 test:
-	pytest tests/
+	pytest -v
 
 coverage:
 	rm -f .coverage*
@@ -18,3 +17,5 @@ coverage:
 
 lint:
 	pylint digest/
+
+.PHONY: test
