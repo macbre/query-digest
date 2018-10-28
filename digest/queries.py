@@ -8,7 +8,7 @@ from collections import OrderedDict
 from hashlib import md5
 from wikia_common_kibana import Kibana
 
-from .helpers import generalize_sql, remove_comments_from_sql
+from sql_metadata import generalize_sql, remove_comments_from_sql
 
 QUERIES_LIMIT = 50000
 
@@ -302,5 +302,5 @@ def filter_query(entry):
     """
     query = entry['query']
 
-    return 'BEGIN' not in query and 'COMMIT' not in query and 'SHOW SLAVE STATUS' not in query \
+    return 'BEGIN' not in query and 'COMMIT' not in query and not query.startswith('SHOW') \
         and not query.startswith('Important table write')

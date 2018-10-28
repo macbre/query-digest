@@ -13,7 +13,7 @@ setup(
         'docopt==0.6.2',
         'tabulate==0.8.2',
         'wikia-common-kibana==2.2.6',
-        'sql_metadata==1.1.2',
+        'sql_metadata==1.2',
     ],
     extras_require={
         'dev': [
