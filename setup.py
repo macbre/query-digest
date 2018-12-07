@@ -12,8 +12,8 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'tabulate==0.8.2',
-        'wikia-common-kibana==2.2.6',
-        'sql_metadata==1.2',
+        'elasticsearch-query==2.3.0',
+        'sql_metadata==1.3',
     ],
     extras_require={
         'dev': [
