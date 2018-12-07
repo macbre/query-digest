@@ -12,14 +12,14 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'tabulate==0.8.2',
-        'wikia-common-kibana==2.2.6',
-        'sql_metadata==1.2',
+        'elasticsearch-query==2.3.0',
+        'sql_metadata==1.3',
     ],
     extras_require={
         'dev': [
-            'coverage==4.5.1',
-            'pylint==1.9.2',  # 2.x branch is for Python 3
-            'pytest==3.9.3',
+            'coverage==4.5.2',
+            'pylint>=1.9.2, <=2.1.1',  # 2.x branch is for Python 3
+            'pytest==4.0.0',
         ]
     },
     include_package_data=True,

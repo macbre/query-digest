@@ -6,11 +6,12 @@ import re
 
 from collections import OrderedDict
 from hashlib import md5
-from wikia_common_kibana import Kibana
+from elasticsearch_query import ElasticsearchQuery
 
 from sql_metadata import generalize_sql, remove_comments_from_sql
 
 QUERIES_LIMIT = 50000
+LOGS_ES_HOST = 'logs-prod.es.service.sjc.consul'
 
 
 def get_log_entries(query, period, fields, limit, index_prefix='logstash-other'):
@@ -25,7 +26,7 @@ def get_log_entries(query, period, fields, limit, index_prefix='logstash-other')
     :rtype tuple
     """
     logger = logging.getLogger('get_log_entries')
-    source = Kibana(period=period, index_prefix=index_prefix)
+    source = ElasticsearchQuery(es_host=LOGS_ES_HOST, period=period, index_prefix=index_prefix)
 
     logger.info('Query: \'%s\' for the last %d hour(s)', query, period / 3600)
 
