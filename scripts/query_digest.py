@@ -88,11 +88,17 @@ def queries_reduce(_, values, sequence_len):
     return ret
 
 
-def main():
+def main(arguments=None, output=stdout):
+    """
+    :type arguments dict
+    :type output file
+    """
     logger = logging.getLogger('query_digest')
 
     # handle command line options
-    arguments = docopt.docopt(__doc__)
+    if arguments is None:
+        arguments = docopt.docopt(__doc__)
+
     logger.info("Got the following arguments: {}".format(arguments))
 
     path = arguments.get('--path')
@@ -160,15 +166,15 @@ def main():
 
     # --csv
     if output_csv:
-        writer = DictWriter(f=stdout, fieldnames=data[0].keys())
+        writer = DictWriter(f=output, fieldnames=data[0].keys())
 
-        stdout.write('# {}\n'.format(report_header))
+        output.write('# {}\n'.format(report_header))
         writer.writeheader()
         writer.writerows(data)
     # --simple
     elif simple_output:
         print(report_header)
-        stdout.writelines([
+        output.writelines([
             '{method} {percentage} [{source_host}] db:{dbname} | {query}\n'.format(**entry)
             for entry in data
         ])
@@ -176,14 +182,14 @@ def main():
     elif data_flow_output:
         max_queries = max(item.get('count') for item in data)
 
-        stdout.write('# {}\n'.format(report_header))
+        output.write('# {}\n'.format(report_header))
 
         for item in data:
-            stdout.writelines(data_flow_format_entry(item, max_queries))
+            output.writelines(data_flow_format_entry(item, max_queries))
     # --sql-log
     elif sql_log_output:
         print('-- {}'.format(report_header))
-        stdout.writelines([
+        output.writelines([
             '/* {} */ {}\n'.format(
                 entry.get('method'),
                 entry.get('original_query', '').replace("\n", ' ').encode('utf-8')
