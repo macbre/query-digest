@@ -32,4 +32,10 @@ def test_read_file():
 
     print(queries)
     assert len(queries) == 3
-    assert queries[0]['query'] == 'SELECT foo FROM bar WHERE foo = 1;'
+    assert queries[0]['query'] == 'SELECT foo FROM bar WHERE foo = N;'
+    assert queries[1]['query'] == 'SELECT foo FROM bar WHERE foo = N;'
+    assert queries[2]['query'] == 'SELECT foo FROM bar ORDER BY foo LIMIT N;'
+
+    assert queries[0]['method'] == '4d9ef9d7'
+    assert queries[1]['method'] == '4d9ef9d7'
+    assert queries[2]['method'] == 'get_items.sql'  # extracted from SQL query comment

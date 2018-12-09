@@ -61,20 +61,20 @@ def queries_reduce(_, values, sequence_len):
     ret['percentage'] = '{:.2f}%'.format(100. * ret['count'] / sequence_len)
 
     # calculate times stats
-    times = [value.get('time') for value in values]
+    times = [value.get('time', 0) for value in values]
 
     ret['time_sum'] = sum(times)
     ret['time_median'] = median(times)
 
     # rows stats
-    rows = [value.get('rows') for value in values]
+    rows = [value.get('rows', 0) for value in values]
 
     ret['rows_sum'] = sum(rows)
     ret['rows_median'] = median(rows)
 
     # get rid of item specific fields
-    del ret['rows']
-    del ret['time']
+    ret.pop('rows', None)
+    ret.pop('time', None)
 
     # count all queries that were made using master node
     if ret.get('from_master') is not None:

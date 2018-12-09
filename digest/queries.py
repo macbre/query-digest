@@ -17,7 +17,7 @@ LOGS_ES_HOST = 'logs-prod.es.service.sjc.consul'
 
 def get_sql_queries_by_file(file_path):
     """
-    Get log entries from provided file
+    Get normalized log entries from provided file
 
     :type file_path str
     :rtype tuple
@@ -28,8 +28,26 @@ def get_sql_queries_by_file(file_path):
     except Exception as ex:
         raise QueryDigestReadError(ex)
 
+    def wrap_query(sql):
+        """
+        :type sql str
+        :rtype: str
+        """
+        comment = re.match(r'/\*([^*]+)\*/', sql)
+        if comment:
+            comment = str(comment.group(1)).strip()
+
+        normalized_sql = generalize_sql(sql.strip())
+
+        return {
+            'query': normalized_sql,
+            # use comment extracted from SQL or
+            # a short md5 hash of normalized SQL
+            'method': comment or md5(normalized_sql.encode('utf8')).hexdigest()[0:8]
+        }
+
     return [
-        {'query': line.strip()} for line in lines
+        wrap_query(line) for line in lines
         # filter out lines with SQL commands (-- foo) and empty ones
         if not line.startswith('--') and line != '\n'
     ]
