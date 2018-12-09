@@ -1,4 +1,4 @@
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements,redefined-builtin
 """
 This is a dynamic code analysis tool that processes SQL queries logs
 and reports those made by given feature or using given table
@@ -105,6 +105,7 @@ def main(arguments=None, output=stdout):
 
     logger.info("Got the following arguments: %s", arguments)
 
+    file = arguments.get('--file')
     path = arguments.get('--path')
     service = arguments.get('--service')
     table = arguments.get('--table')
@@ -119,7 +120,9 @@ def main(arguments=None, output=stdout):
 
     # period = 60  # 10 minutes # DEBUG
 
-    if path is not None:
+    if file is not None:
+        logger.info('Digesting queries from "%s" file', file)
+    elif path is not None:
         logger.info('Digesting queries for "%s" path', path)
     elif service is not None:
         logger.info('Digesting queries made by "%s" Pandora service', service)
