@@ -39,12 +39,13 @@ import docopt
 from tabulate import tabulate
 
 from digest.dataflow import data_flow_format_entry
+from digest.errors import QueryDigestCommandLineError
 from digest.map_reduce import map_reduce
 from digest.math import median
 from digest.queries import \
     get_sql_queries_by_path, get_sql_queries_by_table, get_backend_queries_by_table,\
     get_sql_queries_by_service, get_sql_queries_by_database, get_backend_queries_by_database, \
-    filter_query
+    get_sql_queries_by_file, filter_query
 
 
 def queries_reduce(_, values, sequence_len):
@@ -131,10 +132,13 @@ def main(arguments=None, output=stdout):
     elif database is not None:
         logger.info('Digesting queries affecting "%s" database', database)
     else:
-        raise Exception('Either --path or --table needs to be provided')
+        raise QueryDigestCommandLineError('Either --file, --path or --table needs to be provided')
 
     # run the reporter
-    if path is not None:
+    if file is not None:
+        queries = get_sql_queries_by_file(file)
+        report_header = '"{}" file'.format(file)
+    elif path is not None:
         queries = get_sql_queries_by_path(path, period=period)
         report_header = '"{}" path'.format(path)
     elif service is not None:
@@ -152,7 +156,7 @@ def main(arguments=None, output=stdout):
     queries = tuple(filter(filter_query, queries))
 
     if not queries:
-        raise Exception('No queries found for "{}" path'.format(path))
+        raise QueryDigestCommandLineError('No queries found for {}'.format(report_header))
 
     logger.info('Processing %d queries from the last %d hour(s)...', len(queries), period / 3600)
 

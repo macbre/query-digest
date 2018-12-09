@@ -14,6 +14,23 @@ QUERIES_LIMIT = 50000
 LOGS_ES_HOST = 'logs-prod.es.service.sjc.consul'
 
 
+def get_sql_queries_by_file(file_path):
+    """
+    Get log entries from provided file
+
+    :type file_path str
+    :rtype tuple
+    """
+    with open(file_path, 'rt') as handler:
+        lines = handler.readlines()
+
+    return [
+        {'query': line.strip()} for line in lines
+        # filter out lines with SQL commands (-- foo) and empty ones
+        if not line.startswith('--') and line != '\n'
+    ]
+
+
 def get_log_entries(query, period, fields, limit, index_prefix='logstash-other'):
     """
     Get log entries from elasticsearch that match given query
