@@ -16,6 +16,6 @@ coverage:
 	coverage report $(coverage_options)
 
 lint:
-	pylint digest/
+	pylint digest/ scripts/
 
 .PHONY: test

@@ -1,3 +1,6 @@
+"""
+Command line tool
+"""
 import logging
 
 from os import getenv
