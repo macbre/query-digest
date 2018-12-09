@@ -38,12 +38,14 @@ def get_sql_queries_by_file(file_path):
             comment = str(comment.group(1)).strip()
 
         normalized_sql = generalize_sql(sql.strip())
+        sql_hash = md5(normalized_sql.encode('utf8')).hexdigest()[0:8]
 
         return {
             'query': normalized_sql,
             # use comment extracted from SQL or
             # a short md5 hash of normalized SQL
-            'method': comment or md5(normalized_sql.encode('utf8')).hexdigest()[0:8]
+            'method': comment or sql_hash,
+            'source_host': sql_hash,
         }
 
     return [
