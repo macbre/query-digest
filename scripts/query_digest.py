@@ -26,7 +26,7 @@ Example:
 
   query_digest --table=wall_notification --simple - simple output type (list queries only)
 """
-from __future__ import print_function
+from __future__ import unicode_literals
 import logging
 
 from functools import reduce
@@ -96,7 +96,7 @@ def queries_reduce(_, values, sequence_len):
 def main(arguments=None, output=stdout):
     """
     :type arguments dict
-    :type output file
+    :type output io.StringIO
     """
     logger = logging.getLogger('query_digest')
 
@@ -185,7 +185,7 @@ def main(arguments=None, output=stdout):
         writer.writerows(data)
     # --simple
     elif simple_output:
-        print(report_header)
+        output.write(report_header + '\n')
         output.writelines([
             '{method} {percentage} [{source_host}] db:{dbname} | {query}\n'.format(**entry)
             for entry in data
@@ -200,7 +200,7 @@ def main(arguments=None, output=stdout):
             output.writelines(data_flow_format_entry(item, max_queries))
     # --sql-log
     elif sql_log_output:
-        print('-- {}'.format(report_header))
+        output.write('-- {}\n'.format(report_header))
         output.writelines([
             '/* {} */ {}\n'.format(
                 entry.get('method'),
@@ -209,6 +209,6 @@ def main(arguments=None, output=stdout):
         ])
     else:
         # @see https://pypi.python.org/pypi/tabulate
-        print(report_header)
-        print(tabulate(data, headers='keys', tablefmt='grid'))
-        print('Note: times are in [ms], queries are normalized')
+        output.write(report_header + '\n')
+        output.write(tabulate(data, headers='keys', tablefmt='grid') + '\n')
+        output.write('Note: times are in [ms], queries are normalized' + '\n')
