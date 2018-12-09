@@ -52,5 +52,6 @@ def test_read_hive_sql_data_flow():
 
     print(out.getvalue())
     assert 'test/fixtures/hive.sql" file, found 2 queries' in out.getvalue()
+    assert 'hive_01_insert\thive_01_insert\tdb:foo_report\t1.00' in out.getvalue()
     assert 'db:rollup_wiki_beacon_pageviews\thive_01_select\thive_01_select\t1.00' in out.getvalue()
     assert 'statsdb:dimension_wikis\thive_01_select\thive_01_select\t1.00' in out.getvalue()
