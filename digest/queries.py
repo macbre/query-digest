@@ -7,8 +7,9 @@ import re
 from collections import OrderedDict
 from hashlib import md5
 from elasticsearch_query import ElasticsearchQuery
-
 from sql_metadata import generalize_sql, remove_comments_from_sql
+
+from digest.errors import QueryDigestReadError
 
 QUERIES_LIMIT = 50000
 LOGS_ES_HOST = 'logs-prod.es.service.sjc.consul'
@@ -21,8 +22,11 @@ def get_sql_queries_by_file(file_path):
     :type file_path str
     :rtype tuple
     """
-    with open(file_path, 'rt') as handler:
-        lines = handler.readlines()
+    try:
+        with open(file_path, 'rt') as handler:
+            lines = handler.readlines()
+    except Exception as ex:
+        raise QueryDigestReadError(ex)
 
     return [
         {'query': line.strip()} for line in lines
