@@ -34,3 +34,13 @@ def test_read_file_table():
     assert 'test/fixtures/queries.sql" file, found 3 queries' in out.getvalue()
     assert 'SELECT foo FROM bar WHERE foo = N;' in out.getvalue()
     assert 'get_items.sql' in out.getvalue()
+
+
+def test_read_file_data_flow():
+    out = StringIO()
+    main(arguments={'--file': join(fixtures_dir, 'queries.sql'), '--data-flow': True}, output=out)
+
+    print(out.getvalue())
+    assert 'test/fixtures/queries.sql" file, found 3 queries' in out.getvalue()
+    assert 'db:bar\t4d9ef9d7\t4d9ef9d7\t1.00' in out.getvalue()
+    assert 'db:bar\tget_items.sql\tget_items.sql\t0.50' in out.getvalue()
