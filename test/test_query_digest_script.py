@@ -44,3 +44,13 @@ def test_read_file_data_flow():
     assert 'test/fixtures/queries.sql" file, found 3 queries' in out.getvalue()
     assert 'db:bar\t4d9ef9d7\t4d9ef9d7\t1.00' in out.getvalue()
     assert 'db:bar\tget_items.sql\tget_items.sql\t0.50' in out.getvalue()
+
+
+def test_read_hive_sql_data_flow():
+    out = StringIO()
+    main(arguments={'--file': join(fixtures_dir, 'hive.sql'), '--data-flow': True}, output=out)
+
+    print(out.getvalue())
+    assert 'test/fixtures/hive.sql" file, found 2 queries' in out.getvalue()
+    assert 'db:rollup_wiki_beacon_pageviews\thive_01_select\thive_01_select\t1.00' in out.getvalue()
+    assert 'statsdb:dimension_wikis\thive_01_select\thive_01_select\t1.00' in out.getvalue()

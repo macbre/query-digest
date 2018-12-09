@@ -14,6 +14,8 @@ def get_query_metadata(query):
     """
     kind = query.split(' ')[0].upper()  # SELECT, INSERT, UPDATE, ...
 
+    # print(kind, query, get_query_tables(query))
+
     # SET sql_big_selects=N
     if kind in ['BEGIN', 'COMMIT', 'SHOW', 'SET']:
         return kind, None
@@ -22,8 +24,8 @@ def get_query_metadata(query):
         return kind, tuple(get_query_tables(query))
 
     try:
-        # INSERT INTO, DELETE FROM
-        matches = re.search(r'(FROM|INTO) ([`,.\w]+)', query, flags=re.IGNORECASE)
+        # INSERT INTO, DELETE FROM, INSERT OVERWRITE TABLE
+        matches = re.search(r'(FROM|INTO|TABLE) ([`,.\w]+)', query, flags=re.IGNORECASE)
 
         # multi-table SELECTS
         # SELECT * FROM foo,bar,test
