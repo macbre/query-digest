@@ -1,6 +1,8 @@
 """
 Helper function used to format TSV-like entry for data flow file
 """
+from __future__ import unicode_literals
+
 import logging
 import re
 
@@ -17,7 +19,7 @@ def data_flow_format_entry(entry, max_queries):
 
     :type entry: dict
     :type max_queries: int
-    :rtype string
+    :rtype: list[str]
     """
     # OrderedDict([('query', 'SELECT wiki_id,page_id FROM `image_review` WHERE wiki_id = X'),
     # ('method', u'UpdateImageReview::getImageReviewFiles'),
