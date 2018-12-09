@@ -1,6 +1,8 @@
 """
 Helper function used to format TSV-like entry for data flow file
 """
+from __future__ import unicode_literals
+
 import logging
 import re
 
@@ -17,7 +19,7 @@ def data_flow_format_entry(entry, max_queries):
 
     :type entry: dict
     :type max_queries: int
-    :rtype string
+    :rtype: list[str]
     """
     # OrderedDict([('query', 'SELECT wiki_id,page_id FROM `image_review` WHERE wiki_id = X'),
     # ('method', u'UpdateImageReview::getImageReviewFiles'),
@@ -49,6 +51,8 @@ def data_flow_format_entry(entry, max_queries):
     # parse caller name and extract class and method name
     method = entry.get('method')
 
+    # print(query, tables, method)
+
     try:
         if ' via ' in method:
             # handle Perl method names: "DB.pm line 238 via fiximagereview.pl line 123"
@@ -75,20 +79,20 @@ def data_flow_format_entry(entry, max_queries):
             source = table.replace('.', ':')
         else:
             # local / shared table (prefix with a db name)
-            source = '{db}:{table}'.format(db=entry.get('dbname'), table=table)
+            source = '{db}:{table}'.format(db=entry.get('dbname', 'db'), table=table)
 
         # for writing queries reverse the order
         if kind != 'SELECT':
             (source, target) = (target, source)
 
-        yield '{source}\t{edge}\t{target}\t{weight:.2f}\t{metadata}\n'.format(
+        yield '{source}\t{edge}\t{target}\t{weight:.2f}{metadata}\n'.format(
             source=source,
             edge=edge,
             target=target,
             weight=1. * entry.get('count') / max_queries,
-            metadata='{at}, median time: {time:.2f} ms, count: {count}'.format(
+            metadata='\t{at}, median time: {time:.2f} ms, count: {count}'.format(
                 at=entry.get('source_host'),  # cron, ap, ...
                 time=entry.get('time_median') * 100.,
                 count=entry.get('count') * 100  # multiply for 1% logs sampling
-            )
+            ) if entry.get('source_host') else ''
         )

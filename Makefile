@@ -1,4 +1,4 @@
-coverage_options = --include='digest/*' --omit='test/*'
+coverage_options = --include='digest/*,scripts/*' --omit='test/*'
 
 install:
 	pip install -e .[dev]
@@ -16,6 +16,6 @@ coverage:
 	coverage report $(coverage_options)
 
 lint:
-	pylint digest/
+	pylint digest/ scripts/
 
 .PHONY: test

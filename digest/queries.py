@@ -7,11 +7,50 @@ import re
 from collections import OrderedDict
 from hashlib import md5
 from elasticsearch_query import ElasticsearchQuery
-
 from sql_metadata import generalize_sql, remove_comments_from_sql
+
+from digest.errors import QueryDigestReadError
 
 QUERIES_LIMIT = 50000
 LOGS_ES_HOST = 'logs-prod.es.service.sjc.consul'
+
+
+def get_sql_queries_by_file(file_path):
+    """
+    Get normalized log entries from provided file
+
+    :type file_path str
+    :rtype tuple
+    """
+    try:
+        with open(file_path, 'rt') as handler:
+            lines = handler.readlines()
+    except Exception as ex:
+        raise QueryDigestReadError(ex)
+
+    def wrap_query(sql):
+        """
+        :type sql str
+        :rtype: str
+        """
+        comment = re.match(r'/\*([^*]+)\*/', sql)
+        if comment:
+            comment = str(comment.group(1)).strip()
+
+        normalized_sql = generalize_sql(sql.strip())
+
+        return {
+            'query': normalized_sql,
+            # use comment extracted from SQL or
+            # a short md5 hash of normalized SQL
+            'method': comment or md5(normalized_sql.encode('utf8')).hexdigest()[0:8]
+        }
+
+    return [
+        wrap_query(line) for line in lines
+        # filter out lines with SQL commands (-- foo) and empty ones
+        if not line.startswith('--') and line != '\n'
+    ]
 
 
 def get_log_entries(query, period, fields, limit, index_prefix='logstash-other'):

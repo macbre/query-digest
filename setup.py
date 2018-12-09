@@ -13,7 +13,7 @@ setup(
         'docopt==0.6.2',
         'tabulate==0.8.2',
         'elasticsearch-query==2.3.0',
-        'sql_metadata==1.3',
+        'sql_metadata==1.5.0',
     ],
     extras_require={
         'dev': [
